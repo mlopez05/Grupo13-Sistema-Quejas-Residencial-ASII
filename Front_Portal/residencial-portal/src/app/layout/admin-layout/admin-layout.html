@@ -1,0 +1,117 @@
+<div class="min-h-screen bg-slate-100">
+
+  <!-- Sidebar administrativo -->
+  <aside class="fixed inset-y-0 left-0 z-40 flex w-72 flex-col bg-slate-950 text-white">
+
+    <!-- Branding -->
+    <div class="flex h-20 items-center gap-3 border-b border-slate-800 px-6">
+
+      <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600">
+        🏢
+      </div>
+
+      <div>
+        <p class="font-bold tracking-tight">
+          Portal Administrativo
+        </p>
+
+        <p class="text-xs text-slate-400">
+          Gestión Residencial
+        </p>
+      </div>
+
+    </div>
+
+    <!-- Navegación -->
+    <nav class="flex-1 space-y-2 px-4 py-6">
+
+      <p class="mb-3 px-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+        Principal
+      </p>
+
+      <a
+        routerLink="/admin/dashboard"
+        routerLinkActive="bg-blue-600 text-white"
+        class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white">
+        📊
+        Dashboard
+      </a>
+
+      <a
+        routerLink="/admin/casos"
+        routerLinkActive="bg-blue-600 text-white"
+        class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white">
+        📋
+        Casos
+      </a>
+
+      @if (session?.rol === 'Administrador') {
+
+        <p class="mb-3 mt-8 px-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+          Administración
+        </p>
+
+        <a
+          routerLink="/admin/usuarios"
+          routerLinkActive="bg-blue-600 text-white"
+          class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white">
+          👥
+          Usuarios
+        </a>
+
+      }
+
+    </nav>
+
+    <!-- Usuario -->
+    <div class="border-t border-slate-800 p-4">
+
+      <div class="mb-3 rounded-xl bg-slate-900 p-3">
+
+        <p class="truncate text-sm font-medium text-white">
+          {{ session?.usuario }}
+        </p>
+
+        <p class="text-xs text-slate-400">
+          {{ session?.rol }}
+        </p>
+
+      </div>
+
+      <button
+        type="button"
+        (click)="cerrarSesion()"
+        class="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-400 transition hover:bg-red-500/10 hover:text-red-400">
+        🚪
+        Cerrar sesión
+      </button>
+
+    </div>
+
+  </aside>
+
+
+  <!-- Contenido -->
+  <main class="min-h-screen pl-72">
+
+    <header class="flex h-20 items-center border-b border-slate-200 bg-white px-8">
+
+      <div>
+        <p class="text-sm text-slate-500">
+          Administración
+        </p>
+
+        <h1 class="text-xl font-bold text-slate-900">
+          Gestión del residencial
+        </h1>
+      </div>
+
+    </header>
+
+    <div class="p-8">
+      <router-outlet></router-outlet>
+    </div>
+
+  </main>
+
+</div>

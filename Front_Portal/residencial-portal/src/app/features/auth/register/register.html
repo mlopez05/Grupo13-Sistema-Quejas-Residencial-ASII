@@ -1,0 +1,403 @@
+<div class="mx-auto w-full max-w-4xl px-6 py-10 lg:py-14">
+  <div class="rounded-3xl bg-white shadow-xl shadow-slate-200/60 ring-1 ring-slate-200">
+
+    <!-- Header -->
+    <div class="border-b border-slate-200 px-6 py-8 sm:px-10">
+      <div class="mx-auto max-w-2xl text-center">
+        <div
+          class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-600/20">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8"
+            stroke="currentColor" class="h-6 w-6">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.5 20.25a7.5 7.5 0 0 1 15 0" />
+          </svg>
+        </div>
+
+        <h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+          Crear cuenta
+        </h1>
+
+        <p class="mt-2 text-sm text-slate-500">
+          Regístrate como residente para acceder al portal de tu residencial.
+        </p>
+      </div>
+    </div>
+
+    <!-- Formulario -->
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-8 px-6 py-8 sm:px-10">
+
+      <!-- Datos personales -->
+      <section>
+        <div class="mb-5">
+          <h2 class="text-base font-semibold text-slate-900">
+            Datos personales
+          </h2>
+          <p class="mt-1 text-sm text-slate-500">
+            Ingresa tu información personal.
+          </p>
+        </div>
+
+        <div class="grid gap-5 sm:grid-cols-2">
+
+          <!-- Nombre -->
+          <div>
+            <label for="nombre" class="mb-2 block text-sm font-medium text-slate-700">
+              Nombre <span class="text-red-500">*</span>
+            </label>
+
+            <input id="nombre" type="text" formControlName="nombre" placeholder="Ingresa tu nombre"
+              [class.border-red-500]="isInvalid('nombre')" [class.border-emerald-500]="isValid('nombre')"
+              class="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
+
+            @if (
+            registerForm.controls.nombre.touched &&
+            registerForm.controls.nombre.hasError('required')
+            ) {
+            <p class="mt-2 text-sm text-red-600">
+              El nombre es obligatorio.
+            </p>
+            }
+          </div>
+
+          <!-- Apellido -->
+          <div>
+            <label for="apellido" class="mb-2 block text-sm font-medium text-slate-700">
+              Apellido <span class="text-red-500">*</span>
+            </label>
+
+            <input id="apellido" type="text" formControlName="apellido" placeholder="Ingresa tu apellido"
+              [class.border-red-500]="isInvalid('apellido')" [class.border-emerald-500]="isValid('apellido')"
+              class="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
+
+            @if (
+            registerForm.controls.apellido.touched &&
+            registerForm.controls.apellido.hasError('required')
+            ) {
+            <p class="mt-2 text-sm text-red-600">
+              El apellido es obligatorio.
+            </p>
+            }
+          </div>
+
+          <!-- Fecha nacimiento -->
+          <div>
+            <label for="fechaNacimiento" class="mb-2 block text-sm font-medium text-slate-700">
+              Fecha de nacimiento <span class="text-red-500">*</span>
+            </label>
+
+            <input id="fechaNacimiento" type="date" formControlName="fechaNacimiento"
+              [class.border-red-500]="isInvalid('fechaNacimiento')"
+              [class.border-emerald-500]="isValid('fechaNacimiento')"
+              class="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
+
+            @if (
+            registerForm.controls.fechaNacimiento.touched &&
+            registerForm.controls.fechaNacimiento.hasError('required')
+            ) {
+            <p class="mt-2 text-sm text-red-600">
+              La fecha de nacimiento es obligatoria.
+            </p>
+            }
+          </div>
+
+          <!-- DPI -->
+          <div>
+            <label for="dpi" class="mb-2 block text-sm font-medium text-slate-700">
+              DPI <span class="text-red-500">*</span>
+            </label>
+
+            <input id="dpi" type="text" formControlName="dpi" maxlength="13" inputmode="numeric" autocomplete="off"
+              placeholder="13 dígitos" (input)="onDpiInput($event)" [class.border-red-500]="isInvalid('dpi')"
+              [class.border-emerald-500]="isValid('dpi')"
+              class="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
+
+            @if (
+            registerForm.controls.dpi.touched &&
+            registerForm.controls.dpi.hasError('required')
+            ) {
+            <p class="mt-2 text-sm text-red-600">
+              El DPI es obligatorio.
+            </p>
+            }
+
+            @if (
+            registerForm.controls.dpi.touched &&
+            registerForm.controls.dpi.hasError('pattern')
+            ) {
+            <p class="mt-2 text-sm text-red-600">
+              El DPI debe contener exactamente 13 dígitos.
+            </p>
+            }
+          </div>
+
+          <div>
+            <label for="telefono" class="mb-2 block text-sm font-medium text-slate-700">
+              Teléfono <span class="text-red-500">*</span>
+            </label>
+
+            <input id="telefono" type="tel" formControlName="telefono" maxlength="8" inputmode="numeric"
+              placeholder="55551234" (input)="onTelefonoInput($event)"
+              class="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
+
+            @if (
+            (registerForm.controls.telefono.touched || submitted) &&
+            registerForm.controls.telefono.hasError('required')
+            ) {
+            <p class="mt-2 text-sm text-red-600">
+              El teléfono es obligatorio.
+            </p>
+            }
+
+            @if (
+            registerForm.controls.telefono.touched &&
+            registerForm.controls.telefono.hasError('pattern')
+            ) {
+            <p class="mt-2 text-sm text-red-600">
+              El teléfono debe contener exactamente 8 dígitos.
+            </p>
+            }
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Datos de contacto -->
+      <section>
+        <div class="mb-5">
+          <h2 class="text-base font-semibold text-slate-900">
+            Datos de contacto
+          </h2>
+          <p class="mt-1 text-sm text-slate-500">
+            Utilizaremos estos datos para tu cuenta.
+          </p>
+        </div>
+
+        <div class="space-y-5">
+
+          <!-- Correo -->
+          <div>
+            <label for="correo" class="mb-2 block text-sm font-medium text-slate-700">
+              Correo electrónico <span class="text-red-500">*</span>
+            </label>
+
+            <input id="correo" type="email" formControlName="correo" autocomplete="email"
+              placeholder="ejemplo@correo.com" [class.border-red-500]="isInvalid('correo')"
+              [class.border-emerald-500]="isValid('correo')"
+              class="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
+
+            @if (
+            registerForm.controls.correo.touched &&
+            registerForm.controls.correo.hasError('required')
+            ) {
+            <p class="mt-2 text-sm text-red-600">
+              El correo electrónico es obligatorio.
+            </p>
+            }
+
+            @if (
+            registerForm.controls.correo.touched &&
+            registerForm.controls.correo.hasError('email')
+            ) {
+            <p class="mt-2 text-sm text-red-600">
+              Ingresa un correo electrónico válido.
+            </p>
+            }
+          </div>
+
+          <!-- Dirección -->
+          <div>
+            <label for="direccion" class="mb-2 block text-sm font-medium text-slate-700">
+              Dirección <span class="text-red-500">*</span>
+            </label>
+
+            <textarea id="direccion" formControlName="direccion" rows="3" placeholder="Ingresa tu dirección"
+              [class.border-red-500]="isInvalid('direccion')" [class.border-emerald-500]="isValid('direccion')"
+              class="block w-full resize-none rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"></textarea>
+
+            @if (
+            registerForm.controls.direccion.touched &&
+            registerForm.controls.direccion.hasError('required')
+            ) {
+            <p class="mt-2 text-sm text-red-600">
+              La dirección es obligatoria.
+            </p>
+            }
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Seguridad -->
+      <section>
+        <div class="mb-5">
+          <h2 class="text-base font-semibold text-slate-900">
+            Seguridad de la cuenta
+          </h2>
+          <p class="mt-1 text-sm text-slate-500">
+            Define la contraseña que utilizarás para iniciar sesión.
+          </p>
+        </div>
+
+        <div class="grid gap-5 sm:grid-cols-2">
+
+          <!-- Contraseña -->
+          <div>
+            <label for="clave" class="mb-2 block text-sm font-medium text-slate-700">
+              Contraseña <span class="text-red-500">*</span>
+            </label>
+
+            <div class="relative">
+              <input id="clave" [type]="showPassword ? 'text' : 'password'" formControlName="clave"
+                autocomplete="new-password" placeholder="Mínimo 8 caracteres"
+                [class.border-red-500]="isInvalid('clave')" [class.border-emerald-500]="isValid('clave')"
+                class="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 pr-20 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
+
+              <button type="button" (click)="togglePasswordVisibility()"
+                class="absolute inset-y-0 right-0 flex items-center px-4 text-slate-400 transition hover:text-slate-600"
+                [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+                @if (showPassword) {
+                <span class="text-xs font-medium">Ocultar</span>
+                } @else {
+                <span class="text-xs font-medium">Mostrar</span>
+                }
+              </button>
+            </div>
+
+            @if (
+            registerForm.controls.clave.touched &&
+            registerForm.controls.clave.hasError('required')
+            ) {
+            <p class="mt-2 text-sm text-red-600">
+              La contraseña es obligatoria.
+            </p>
+            }
+
+            @if (
+            registerForm.controls.clave.touched &&
+            registerForm.controls.clave.hasError('minlength')
+            ) {
+            <p class="mt-2 text-sm text-red-600">
+              La contraseña debe tener al menos 8 caracteres.
+            </p>
+            }
+          </div>
+
+          <!-- Confirmar contraseña -->
+          <div>
+            <label for="confirmarClave" class="mb-2 block text-sm font-medium text-slate-700">
+              Confirmar contraseña <span class="text-red-500">*</span>
+            </label>
+
+            <div class="relative">
+              <input id="confirmarClave" [type]="showConfirmPassword ? 'text' : 'password'"
+                formControlName="confirmarClave" autocomplete="new-password" placeholder="Repite tu contraseña"
+                [class.border-red-500]="
+                isInvalid('confirmarClave') ||
+                (registerForm.controls.confirmarClave.touched &&
+                registerForm.hasError('passwordsMismatch'))
+              " [class.border-emerald-500]="
+                isValid('confirmarClave') &&
+                !registerForm.hasError('passwordsMismatch')
+              "
+                class="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 pr-20 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
+
+              <button type="button" (click)="toggleConfirmPasswordVisibility()"
+                class="absolute inset-y-0 right-0 flex items-center px-4 text-slate-400 transition hover:text-slate-600"
+                [attr.aria-label]="showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+                @if (showConfirmPassword) {
+                <span class="text-xs font-medium">Ocultar</span>
+                } @else {
+                <span class="text-xs font-medium">Mostrar</span>
+                }
+              </button>
+            </div>
+
+            @if (
+            registerForm.controls.confirmarClave.touched &&
+            registerForm.controls.confirmarClave.hasError('required')
+            ) {
+            <p class="mt-2 text-sm text-red-600">
+              Debes confirmar tu contraseña.
+            </p>
+            }
+
+            @if (
+            registerForm.controls.confirmarClave.touched &&
+            registerForm.hasError('passwordsMismatch')
+            ) {
+            <p class="mt-2 text-sm text-red-600">
+              Las contraseñas no coinciden.
+            </p>
+            }
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Botón -->
+      <div class="border-t border-slate-200 pt-6">
+        <button type="submit" [disabled]="registerForm.invalid"
+          class="w-full rounded-xl bg-blue-600 px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/20 active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none">
+          Crear cuenta
+        </button>
+
+        <p class="mt-5 text-center text-sm text-slate-500">
+          ¿Ya tienes una cuenta?
+          <a routerLink="/login" class="font-semibold text-blue-600 transition hover:text-blue-700">
+            Inicia sesión
+          </a>
+        </p>
+      </div>
+
+    </form>
+
+    @if (mostrarModal) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-4 backdrop-blur-sm">
+      <div class="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-2xl">
+
+        @if (registroExitoso) {
+
+        <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
+          <span class="text-2xl text-emerald-600">✓</span>
+        </div>
+
+        <h2 class="mt-5 text-xl font-bold text-slate-900">
+          Registro exitoso
+        </h2>
+
+        <p class="mt-2 text-sm leading-6 text-slate-500">
+          Tu cuenta fue creada correctamente.
+          Ya puedes iniciar sesión.
+        </p>
+
+        <button type="button" (click)="cerrarMensaje()"
+          class="mt-6 w-full rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700">
+          Continuar
+        </button>
+
+        } @else {
+
+        <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-100">
+          <span class="text-2xl font-bold text-red-600">!</span>
+        </div>
+
+        <h2 class="mt-5 text-xl font-bold text-slate-900">
+          No fue posible registrarte
+        </h2>
+
+        <p class="mt-2 text-sm leading-6 text-slate-500">
+          {{ mensajeError }}
+        </p>
+
+        <button type="button" (click)="cerrarMensaje()"
+          class="mt-6 w-full rounded-xl bg-slate-800 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-900">
+          Cerrar
+        </button>
+
+        }
+
+      </div>
+    </div>
+    }
+  </div>
+</div>

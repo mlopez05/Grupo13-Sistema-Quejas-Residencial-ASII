@@ -1,0 +1,276 @@
+<div class="space-y-6">
+
+  <!-- Encabezado -->
+  <section class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+
+    <div>
+      <p class="text-sm font-medium text-blue-600">
+        Administración
+      </p>
+
+      <h2 class="mt-1 text-2xl font-bold tracking-tight text-slate-900">
+        Usuarios
+      </h2>
+
+      <p class="mt-2 text-sm text-slate-500">
+        Administra los usuarios administrativos del sistema.
+      </p>
+    </div>
+
+    <a
+      routerLink="/admin/usuarios/nuevo"
+      class="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700">
+
+      <span>+</span>
+      Nuevo usuario
+
+    </a>
+
+  </section>
+
+
+  <!-- Filtros -->
+  <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+
+    <div class="grid gap-4 md:grid-cols-3">
+
+      <!-- Búsqueda -->
+      <div>
+
+        <label
+          for="buscar"
+          class="mb-2 block text-sm font-medium text-slate-700">
+          Buscar
+        </label>
+
+        <input
+          id="buscar"
+          type="text"
+          [(ngModel)]="terminoBusqueda"
+          placeholder="Nombre o correo"
+          class="block w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
+
+      </div>
+
+
+      <!-- Rol -->
+      <div>
+
+        <label
+          for="rol"
+          class="mb-2 block text-sm font-medium text-slate-700">
+          Rol
+        </label>
+
+        <select
+          id="rol"
+          [(ngModel)]="rolSeleccionado"
+          class="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10">
+
+          <option value="">
+            Todos los roles
+          </option>
+
+          @for (rol of roles; track rol) {
+            <option [value]="rol">
+              {{ rol }}
+            </option>
+          }
+
+        </select>
+
+      </div>
+
+
+      <!-- Estado -->
+      <div>
+
+        <label
+          for="estado"
+          class="mb-2 block text-sm font-medium text-slate-700">
+          Estado
+        </label>
+
+        <select
+          id="estado"
+          [(ngModel)]="estadoSeleccionado"
+          class="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10">
+
+          <option value="">
+            Todos los estados
+          </option>
+
+          <option value="Activo">
+            Activos
+          </option>
+
+          <option value="Inactivo">
+            Inactivos
+          </option>
+
+        </select>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- Tabla -->
+  <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+
+    <div class="border-b border-slate-200 px-6 py-5">
+
+      <h3 class="font-semibold text-slate-900">
+        Usuarios registrados
+      </h3>
+
+      <p class="mt-1 text-sm text-slate-500">
+        {{ usuariosFiltrados.length }} usuario(s) encontrado(s)
+      </p>
+
+    </div>
+
+
+    <div class="overflow-x-auto">
+
+      <table class="w-full text-left">
+
+        <thead class="border-b border-slate-200 bg-slate-50">
+
+          <tr>
+
+            <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
+              Usuario
+            </th>
+
+            <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
+              Rol
+            </th>
+
+            <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
+              Estado
+            </th>
+
+            <th class="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
+              Acciones
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody class="divide-y divide-slate-100">
+
+          @for (usuario of usuariosFiltrados; track usuario.id) {
+
+            <tr class="transition hover:bg-slate-50">
+
+              <!-- Usuario -->
+              <td class="px-6 py-5">
+
+                <div class="flex items-center gap-3">
+
+                  <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50 font-semibold text-blue-600">
+                    {{ usuario.nombre.charAt(0) }}
+                  </div>
+
+                  <div>
+
+                    <p class="font-medium text-slate-900">
+                      {{ usuario.nombre }}
+                    </p>
+
+                    <p class="mt-1 text-sm text-slate-500">
+                      {{ usuario.correo }}
+                    </p>
+
+                  </div>
+
+                </div>
+
+              </td>
+
+
+              <!-- Rol -->
+              <td class="px-6 py-5">
+
+                <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+                  {{ usuario.rol }}
+                </span>
+
+              </td>
+
+
+              <!-- Estado -->
+              <td class="px-6 py-5">
+
+                @if (usuario.estado === 'Activo') {
+
+                  <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600">
+                    Activo
+                  </span>
+
+                } @else {
+
+                  <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">
+                    Inactivo
+                  </span>
+
+                }
+
+              </td>
+
+
+              <!-- Acciones -->
+              <td class="px-6 py-5">
+
+                <div class="flex justify-end gap-2">
+
+                  <button
+                    type="button"
+                    class="rounded-lg px-3 py-2 text-xs font-semibold text-blue-600 transition hover:bg-blue-50">
+                    Editar
+                  </button>
+
+                  <button
+                    type="button"
+                    class="rounded-lg px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-100">
+                    {{ usuario.estado === 'Activo' ? 'Inactivar' : 'Activar' }}
+                  </button>
+
+                </div>
+
+              </td>
+
+            </tr>
+
+          }
+
+          @if (usuariosFiltrados.length === 0) {
+
+            <tr>
+
+              <td
+                colspan="4"
+                class="px-6 py-12 text-center text-sm text-slate-500">
+
+                No se encontraron usuarios.
+
+              </td>
+
+            </tr>
+
+          }
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+</div>

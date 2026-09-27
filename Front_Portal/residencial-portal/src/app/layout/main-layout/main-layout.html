@@ -1,0 +1,208 @@
+<div class="min-h-screen bg-slate-100">
+
+  <!-- Sidebar -->
+  <aside
+    class="fixed inset-y-0 left-0 z-40 flex w-72 flex-col bg-slate-950 text-white">
+
+    <!-- Branding -->
+    <div class="flex h-20 items-center gap-3 border-b border-slate-800 px-6">
+
+      <div
+        class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.8"
+          stroke="currentColor"
+          class="h-6 w-6">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="m2.25 12 8.954-8.954a1.125 1.125 0 0 1 1.592 0L21.75 12M4.5 9.75V21h15V9.75M9 21v-6.75h6V21" />
+        </svg>
+      </div>
+
+      <div>
+        <p class="font-bold tracking-tight">
+          Portal Residencial
+        </p>
+
+        <p class="text-xs text-slate-400">
+          Administración & Comunidad
+        </p>
+      </div>
+
+    </div>
+
+    <!-- Navegación -->
+    <nav class="flex-1 space-y-2 px-4 py-6">
+
+      <p class="mb-3 px-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+        Principal
+      </p>
+
+      <a
+        routerLink="/dashboard"
+        routerLinkActive="bg-blue-600 text-white"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white">
+
+        <span>🏠</span>
+        Dashboard
+      </a>
+
+      <a
+        routerLink="/casos"
+        routerLinkActive="bg-blue-600 text-white"
+        class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white">
+
+        <span>📋</span>
+        Mis casos
+      </a>
+
+      <a
+        routerLink="/casos/nuevo"
+        routerLinkActive="bg-blue-600 text-white"
+        class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white">
+
+        <span>➕</span>
+        Nuevo caso
+      </a>
+
+      <a
+        routerLink="/avisos"
+        routerLinkActive="bg-blue-600 text-white"
+        class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white">
+
+        <span>🔔</span>
+        Avisos
+      </a>
+
+      <p class="mb-3 mt-8 px-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+        Cuenta
+      </p>
+
+      <a
+        routerLink="/perfil"
+        routerLinkActive="bg-blue-600 text-white"
+        class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white">
+
+        <span>👤</span>
+        Mi perfil
+      </a>
+
+    </nav>
+
+    <!-- Usuario -->
+    <div class="border-t border-slate-800 p-4">
+
+      <div class="mb-3 flex items-center gap-3 rounded-xl bg-slate-900 p-3">
+
+        <div
+          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-600 font-semibold">
+          {{ session?.usuario?.charAt(0)?.toUpperCase() }}
+        </div>
+
+        <div class="min-w-0">
+          <p class="truncate text-sm font-medium text-white">
+            {{ session?.usuario }}
+          </p>
+
+          <p class="text-xs text-slate-400">
+            {{ session?.rol }}
+          </p>
+        </div>
+
+      </div>
+
+      <button
+        type="button"
+        (click)="cerrarSesion()"
+        class="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-400 transition hover:bg-red-500/10 hover:text-red-400">
+
+        <span>🚪</span>
+        Cerrar sesión
+
+      </button>
+
+    </div>
+
+  </aside>
+
+  <!-- Contenido -->
+  <main class="min-h-screen pl-72">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-slate-200 bg-white px-8">
+
+    <!-- Título -->
+    <div>
+      <p class="text-sm text-slate-500">
+        Portal Residencial
+      </p>
+
+      <h1 class="text-xl font-bold text-slate-900">
+        Mi comunidad
+      </h1>
+    </div>
+
+    <!-- Acciones -->
+    <div class="flex items-center gap-5">
+
+      <!-- Notificaciones -->
+      <button
+        type="button"
+        class="relative flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
+        aria-label="Notificaciones">
+
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.8"
+          stroke="currentColor"
+          class="h-5 w-5">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M14.857 17.082a23.848 23.848 0 0 1-5.714 0A2.25 2.25 0 0 1 7.5 14.86V11.25a4.5 4.5 0 0 1 9 0v3.61a2.25 2.25 0 0 1-1.643 2.222ZM9.75 20.25h4.5" />
+        </svg>
+
+        <!-- Indicador -->
+        <span class="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500"></span>
+
+      </button>
+
+      <!-- Usuario -->
+      <div class="flex items-center gap-3 border-l border-slate-200 pl-5">
+
+        <div class="text-right">
+          <p class="max-w-40 truncate text-sm font-semibold text-slate-900">
+            {{ session?.usuario }}
+          </p>
+
+          <p class="text-xs text-slate-500">
+            {{ session?.rol }}
+          </p>
+        </div>
+
+        <div
+          class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 font-semibold text-white">
+          {{ session?.usuario?.charAt(0)?.toUpperCase() }}
+        </div>
+
+      </div>
+
+    </div>
+
+  </header>
+
+  <!-- Contenido -->
+  <div class="p-8">
+    <router-outlet></router-outlet>
+  </div>
+
+</main>
+
+</div>
