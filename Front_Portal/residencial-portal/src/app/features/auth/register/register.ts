@@ -24,6 +24,46 @@ function passwordsMatchValidator(
   return null;
 }
 
+
+function mayorDeEdadValidator(
+  control: AbstractControl
+): ValidationErrors | null {
+  if (!control.value) return null;
+
+  const nacimiento = new Date(`${control.value}T00:00:00`);
+  const hoy = new Date();
+
+  let edad = hoy.getFullYear() - nacimiento.getFullYear();
+
+  if (
+    hoy.getMonth() < nacimiento.getMonth() ||
+    (hoy.getMonth() === nacimiento.getMonth() &&
+      hoy.getDate() < nacimiento.getDate())
+  ) {
+    edad--;
+  }
+
+  return edad >= 18 ? null : { menorDeEdad: true };
+}
+
+function fechaNoFuturaValidator(
+  control: AbstractControl
+): ValidationErrors | null {
+  if (!control.value) return null;
+
+  const hoy = new Date();
+  const fechaActual = [
+    hoy.getFullYear(),
+    String(hoy.getMonth() + 1).padStart(2, '0'),
+    String(hoy.getDate()).padStart(2, '0'),
+  ].join('-');
+
+  return control.value > fechaActual
+    ? { fechaFutura: true }
+    : null;
+}
+
+
 @Component({
   selector: 'app-register',
   imports: [ReactiveFormsModule, RouterLink],
@@ -42,13 +82,33 @@ export class Register {
   mensajeError = '';
   mostrarModal = false;
 
+
+  readonly fechaMaxima = this.obtenerFechaActual();
+
+  private obtenerFechaActual(): string {
+    const hoy = new Date();
+
+    return [
+      hoy.getFullYear(),
+      String(hoy.getMonth() + 1).padStart(2, '0'),
+      String(hoy.getDate()).padStart(2, '0'),
+    ].join('-');
+  }
+
+
   readonly registerForm = this.formBuilder.group({
     nombre: this.formBuilder.nonNullable.control('', [
       Validators.required,
+      Validators.pattern(
+        /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+(?: [A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)*$/
+      ),
     ]),
 
     apellido: this.formBuilder.nonNullable.control('', [
       Validators.required,
+      Validators.pattern(
+        /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+(?: [A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)*$/
+      ),
     ]),
 
     correo: this.formBuilder.nonNullable.control('', [
@@ -64,6 +124,7 @@ export class Register {
     clave: this.formBuilder.nonNullable.control('', [
       Validators.required,
       Validators.minLength(8),
+      Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).+$/),
     ]),
 
     confirmarClave: this.formBuilder.nonNullable.control('', [
@@ -72,6 +133,8 @@ export class Register {
 
     fechaNacimiento: this.formBuilder.nonNullable.control('', [
       Validators.required,
+      mayorDeEdadValidator,
+      fechaNoFuturaValidator,
     ]),
 
     dpi: this.formBuilder.nonNullable.control('', [
@@ -186,6 +249,22 @@ export class Register {
       .slice(0, 8);
 
     this.registerForm.controls.telefono.setValue(input.value);
+  }
+
+
+  onNombreApellidoInput(
+    event: Event,
+    campo: 'nombre' | 'apellido'
+  ): void {
+    const input = event.target as HTMLInputElement;
+
+    const valor = input.value.replace(
+      /[^a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]/g,
+      ''
+    );
+
+    input.value = valor;
+    this.registerForm.controls[campo].setValue(valor);
   }
 
   cerrarMensaje(): void {

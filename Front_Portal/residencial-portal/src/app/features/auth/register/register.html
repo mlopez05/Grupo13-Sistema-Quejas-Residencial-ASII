@@ -47,7 +47,8 @@
 
             <input id="nombre" type="text" formControlName="nombre" placeholder="Ingresa tu nombre"
               [class.border-red-500]="isInvalid('nombre')" [class.border-emerald-500]="isValid('nombre')"
-              class="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
+              class="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" 
+              (input)="onNombreApellidoInput($event, 'nombre')"/>
 
             @if (
             registerForm.controls.nombre.touched &&
@@ -57,6 +58,16 @@
               El nombre es obligatorio.
             </p>
             }
+
+            @if (
+            registerForm.controls.nombre.touched &&
+            registerForm.controls.nombre.hasError('pattern')
+            ) {
+            <p class="mt-2 text-sm text-red-600">
+              Solo se permiten letras.
+            </p>
+            }
+
           </div>
 
           <!-- Apellido -->
@@ -67,7 +78,8 @@
 
             <input id="apellido" type="text" formControlName="apellido" placeholder="Ingresa tu apellido"
               [class.border-red-500]="isInvalid('apellido')" [class.border-emerald-500]="isValid('apellido')"
-              class="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
+              class="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" 
+              (input)="onNombreApellidoInput($event, 'apellido')"/>
 
             @if (
             registerForm.controls.apellido.touched &&
@@ -77,6 +89,16 @@
               El apellido es obligatorio.
             </p>
             }
+
+            @if (
+            registerForm.controls.apellido.touched &&
+            registerForm.controls.apellido.hasError('pattern')
+            ) {
+            <p class="mt-2 text-sm text-red-600">
+              Solo se permiten letras.
+            </p>
+            }
+
           </div>
 
           <!-- Fecha nacimiento -->
@@ -85,7 +107,7 @@
               Fecha de nacimiento <span class="text-red-500">*</span>
             </label>
 
-            <input id="fechaNacimiento" type="date" formControlName="fechaNacimiento"
+            <input id="fechaNacimiento" type="date" formControlName="fechaNacimiento" [max]="fechaMaxima"
               [class.border-red-500]="isInvalid('fechaNacimiento')"
               [class.border-emerald-500]="isValid('fechaNacimiento')"
               class="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
@@ -98,6 +120,25 @@
               La fecha de nacimiento es obligatoria.
             </p>
             }
+
+            @if (
+            registerForm.controls.fechaNacimiento.touched &&
+            registerForm.controls.fechaNacimiento.hasError('menorDeEdad')
+            ) {
+            <p class="mt-2 text-sm text-red-600">
+              Debes tener al menos 18 años para registrarte.
+            </p>
+            }
+
+            @if (
+            registerForm.controls.fechaNacimiento.touched &&
+            registerForm.controls.fechaNacimiento.hasError('fechaFutura')
+            ) {
+            <p class="mt-2 text-sm text-red-600">
+              No puedes seleccionar una fecha posterior a la actual.
+            </p>
+            }
+
           </div>
 
           <!-- DPI -->
@@ -280,6 +321,16 @@
               La contraseña debe tener al menos 8 caracteres.
             </p>
             }
+
+            @if (
+            registerForm.controls.clave.touched &&
+            registerForm.controls.clave.hasError('pattern')
+            ) {
+            <p class="mt-2 text-sm text-red-600">
+              La contraseña debe incluir mayúsculas, minúsculas y números.
+            </p>
+            }
+
           </div>
 
           <!-- Confirmar contraseña -->
