@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.portal.residencial.authservice.dto.CorreoRequest;
 import com.portal.residencial.authservice.dto.RegistroRequest;
 import com.portal.residencial.authservice.dto.RegistroResponse;
 import com.portal.residencial.authservice.service.UsuarioService;
@@ -28,5 +29,12 @@ public class UsuarioController {
     @PostMapping("/staff")
     public ResponseEntity<RegistroResponse> guardarAdmin(@Valid @RequestBody RegistroRequest request){
         return ResponseEntity.ok(usuarioService.registroUsuarioPortal(request));
+    }
+
+    @PostMapping("/confirma-correo")
+    public ResponseEntity<Boolean> existeCorreo(@Valid @RequestBody CorreoRequest correo){
+        boolean existe = usuarioService.existeCorreo(correo);
+
+        return  ResponseEntity.ok(existe);    
     }
 }

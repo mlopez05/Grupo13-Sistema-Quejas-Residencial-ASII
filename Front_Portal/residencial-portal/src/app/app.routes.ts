@@ -51,6 +51,12 @@ export const routes: Routes = [
           import('./features/public/avisos/avisos')
             .then(m => m.Avisos),
       },
+      {
+        path: 'restaurar-clave',
+          loadComponent: () =>
+            import('./features/auth/forgot-password/forgot-password')
+              .then(m => m.ForgotPassword)
+      }
     ],
   },
 

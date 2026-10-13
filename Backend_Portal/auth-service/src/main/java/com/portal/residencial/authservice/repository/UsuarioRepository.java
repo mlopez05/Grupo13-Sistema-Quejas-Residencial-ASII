@@ -12,4 +12,6 @@ public interface UsuarioRepository  extends JpaRepository<Usuario, Long>{
     Optional<Usuario> findByDpi(String dpi);
 
     Optional<Usuario> findByCorreoAndClave(String correo, String clave);
+
+    
 }

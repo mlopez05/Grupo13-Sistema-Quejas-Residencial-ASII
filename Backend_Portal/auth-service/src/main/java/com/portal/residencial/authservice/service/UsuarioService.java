@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.portal.residencial.authservice.dto.CorreoRequest;
 import com.portal.residencial.authservice.dto.RegistroRequest;
 import com.portal.residencial.authservice.dto.RegistroResponse;
 import com.portal.residencial.authservice.exception.BusinessException;
@@ -102,6 +103,11 @@ public class UsuarioService {
                                 .build();
 
                 return uResponse;
+        }
+
+        public Boolean existeCorreo(CorreoRequest correo){
+                return usuarioRepository.findByCorreo(correo.usuario()).isPresent();
+
         }
 
         /* Método para crear el usuario admin */
