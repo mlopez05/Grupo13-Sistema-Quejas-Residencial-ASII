@@ -1,6 +1,7 @@
 package com.portal.residencial.authservice.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,7 @@ import com.portal.residencial.authservice.dto.RegistroResponse;
 import com.portal.residencial.authservice.exception.BusinessException;
 import com.portal.residencial.authservice.model.Rol;
 import com.portal.residencial.authservice.model.Usuario;
+import com.portal.residencial.authservice.notificacion.NotificacionClient;
 import com.portal.residencial.authservice.repository.RolRepository;
 import com.portal.residencial.authservice.repository.UsuarioRepository;
 
@@ -25,6 +27,7 @@ public class UsuarioService {
         private final UsuarioRepository usuarioRepository;
         private final RolRepository rolRepository;
         private final PasswordEncoder passwordEncoder;
+        private final NotificacionClient notificacionClient;
 
         public RegistroResponse registroUsuarioResidente(RegistroRequest request) {
 
@@ -105,9 +108,21 @@ public class UsuarioService {
                 return uResponse;
         }
 
-        public Boolean existeCorreo(CorreoRequest correo){
-                return usuarioRepository.findByCorreo(correo.usuario()).isPresent();
+        public void solicitarRecuperacion(String correo) {
+                Usuario usuario = usuarioRepository.findByCorreo(correo)
+                                .orElseThrow(() -> new BusinessException(
+                                                "El correo ingresado no está registrado en el sistema.",
+                                                HttpStatus.NOT_FOUND));
 
+                String token = UUID.randomUUID().toString();
+
+                PasswordResetToken resetToken = new PasswordResetToken();
+                resetToken.setToken(token);
+                resetToken.setCorreoUsuario(correo);
+                resetToken.setExpiracion(LocalDateTime.now().plusMinutes(30));
+                tokenRepository.save(resetToken);
+
+                notificacionClient.enviarRecuperacionPassword(correo, token);
         }
 
         /* Método para crear el usuario admin */
