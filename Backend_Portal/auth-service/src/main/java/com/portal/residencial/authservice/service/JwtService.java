@@ -15,11 +15,11 @@ import org.springframework.beans.factory.annotation.Value;
 
 @Service
 public class JwtService {
-    
+
     @Value("${jwt.secret}")
     private String secretKey;
 
-    @Value("${jwt.expiration}") 
+    @Value("${jwt.expiration}")
     private long expiration;
 
     public String generarToken(UserDetails userDetails) {
@@ -56,5 +56,14 @@ public class JwtService {
     private SecretKey getSigningKey() {
         byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
         return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    public String generarTokenRecuperacion(String correo) {
+        return Jwts.builder()
+                .subject(correo)
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + 1800000)) 
+                .signWith(getSigningKey())
+                .compact();
     }
 }

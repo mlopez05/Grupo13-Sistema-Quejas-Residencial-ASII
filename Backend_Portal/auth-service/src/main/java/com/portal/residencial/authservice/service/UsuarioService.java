@@ -1,14 +1,12 @@
 package com.portal.residencial.authservice.service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.portal.residencial.authservice.dto.CorreoRequest;
 import com.portal.residencial.authservice.dto.RegistroRequest;
 import com.portal.residencial.authservice.dto.RegistroResponse;
 import com.portal.residencial.authservice.exception.BusinessException;
@@ -18,6 +16,8 @@ import com.portal.residencial.authservice.notificacion.NotificacionClient;
 import com.portal.residencial.authservice.repository.RolRepository;
 import com.portal.residencial.authservice.repository.UsuarioRepository;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -28,6 +28,7 @@ public class UsuarioService {
         private final RolRepository rolRepository;
         private final PasswordEncoder passwordEncoder;
         private final NotificacionClient notificacionClient;
+        private final JwtService jwtService;
 
         public RegistroResponse registroUsuarioResidente(RegistroRequest request) {
 
@@ -109,20 +110,31 @@ public class UsuarioService {
         }
 
         public void solicitarRecuperacion(String correo) {
-                Usuario usuario = usuarioRepository.findByCorreo(correo)
+                usuarioRepository.findByCorreo(correo)
                                 .orElseThrow(() -> new BusinessException(
                                                 "El correo ingresado no está registrado en el sistema.",
                                                 HttpStatus.NOT_FOUND));
 
-                String token = UUID.randomUUID().toString();
-
-                PasswordResetToken resetToken = new PasswordResetToken();
-                resetToken.setToken(token);
-                resetToken.setCorreoUsuario(correo);
-                resetToken.setExpiracion(LocalDateTime.now().plusMinutes(30));
-                tokenRepository.save(resetToken);
-
+                String token = jwtService.generarTokenRecuperacion(correo);
                 notificacionClient.enviarRecuperacionPassword(correo, token);
+        }
+
+        public void restablecerPassword(String token, String nuevaPassword) {
+                String correo;
+                try {
+                        correo = jwtService.extraerUsername(token);
+                } catch (ExpiredJwtException e) {
+                        throw new BusinessException("El enlace de recuperación ha expirado.", HttpStatus.BAD_REQUEST);
+                } catch (JwtException e) {
+                        throw new BusinessException("El enlace de recuperación no es válido.", HttpStatus.BAD_REQUEST);
+                }
+
+                Usuario usuario = usuarioRepository.findByCorreo(correo)
+                                .orElseThrow(() -> new BusinessException("Usuario no encontrado.",
+                                                HttpStatus.NOT_FOUND));
+
+                usuario.setClave(passwordEncoder.encode(nuevaPassword));
+                usuarioRepository.save(usuario);
         }
 
         /* Método para crear el usuario admin */
