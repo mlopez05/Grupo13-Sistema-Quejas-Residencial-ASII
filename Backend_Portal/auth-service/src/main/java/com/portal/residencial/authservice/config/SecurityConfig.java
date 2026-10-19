@@ -37,7 +37,7 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/login", "/api/registro/residente", "/api/auth/reset-password", "/api/auth/forgot-password").permitAll()
-                .requestMatchers("/api/registro/staff").hasRole("Administrador")
+                .requestMatchers("/api/registro/staff", "/api/registro/actualizar").hasRole("Administrador")
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session

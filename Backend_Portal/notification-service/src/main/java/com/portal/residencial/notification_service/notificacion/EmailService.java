@@ -29,7 +29,7 @@ public class EmailService {
             helper.setFrom(remitente);
             helper.setTo(request.correoDestinatario());
             helper.setSubject(plantilla.asunto(request.tipo(), request.datos()));
-            helper.setText(plantilla.cuerpo(request.tipo(), request.datos()), false);
+            helper.setText(plantilla.cuerpo(request.tipo(), request.datos()), true);
 
             mailSender.send(mensaje);
         } catch (MessagingException e) {

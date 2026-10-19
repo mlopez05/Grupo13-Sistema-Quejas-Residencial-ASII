@@ -4,9 +4,12 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.portal.residencial.authservice.bitacora.BitacoraClient;
+import com.portal.residencial.authservice.dto.ActualizarUsuarioRequest;
 import com.portal.residencial.authservice.dto.RegistroRequest;
 import com.portal.residencial.authservice.dto.RegistroResponse;
 import com.portal.residencial.authservice.exception.BusinessException;
@@ -28,6 +31,7 @@ public class UsuarioService {
         private final RolRepository rolRepository;
         private final PasswordEncoder passwordEncoder;
         private final NotificacionClient notificacionClient;
+        private final BitacoraClient bitacoraClient;
         private final JwtService jwtService;
 
         public RegistroResponse registroUsuarioResidente(RegistroRequest request) {
@@ -57,6 +61,7 @@ public class UsuarioService {
                                 .direccion(request.getDireccion())
                                 .fecha_registro(LocalDate.now())
                                 .hora_registro(LocalTime.now())
+                                .estado("Activo")
                                 .build();
 
                 Usuario usuarioRegistrado = usuarioRepository.save(usuario);
@@ -66,6 +71,8 @@ public class UsuarioService {
                                 .nombre(usuarioRegistrado.getNombre())
                                 .apellido(usuarioRegistrado.getApellido())
                                 .build();
+
+                notificacionClient.enviarBienvenida(uResponse.getUsuario());
 
                 return uResponse;
         }
@@ -92,10 +99,12 @@ public class UsuarioService {
                                 .clave(passwordEncoder.encode(request.getClave()))
                                 .fecha_nacimiento(request.getFecha_nacimiento())
                                 .dpi(request.getDpi())
+                                .telefono("kfslf")
                                 .rol(rol)
                                 .direccion(request.getDireccion())
                                 .fecha_registro(LocalDate.now())
                                 .hora_registro(LocalTime.now())
+                                .estado("Activo")
                                 .build();
 
                 Usuario usuarioRegistrado = usuarioRepository.save(usuario);
@@ -135,6 +144,88 @@ public class UsuarioService {
 
                 usuario.setClave(passwordEncoder.encode(nuevaPassword));
                 usuarioRepository.save(usuario);
+        }
+
+        public void actualizarUsuario(Long id, ActualizarUsuarioRequest request, String ip) {
+                Usuario usuarioExistente = usuarioRepository.findById(id)
+                                .orElseThrow(() -> new BusinessException("Usuario no encontrado.",
+                                                HttpStatus.NOT_FOUND));
+
+                String correoModificador = obtenerCorreoUsuarioAutenticado();
+
+                Usuario usuarioModificador = usuarioRepository.findByCorreo(correoModificador)
+                                .orElseThrow(() -> new BusinessException("Usuario modificador no encontrado.",
+                                                HttpStatus.NOT_FOUND));
+
+                registrarSiCambio(usuarioExistente.getId(), usuarioExistente.getNombre(), usuarioExistente.getApellido(),
+                                   "nombre", usuarioExistente.getNombre(), request.nombreUsuario(), ip, usuarioModificador.getId(),
+                                        usuarioModificador.getNombre(), usuarioModificador.getApellido());
+
+                registrarSiCambio(usuarioExistente.getId(), usuarioExistente.getNombre(), usuarioExistente.getApellido(),
+                                   "apellido", usuarioExistente.getApellido(), request.apellidoUsuario(), ip, usuarioModificador.getId(),
+                                        usuarioModificador.getNombre(), usuarioModificador.getApellido());
+
+                if (request.fechaNacimiento() != null){
+                registrarSiCambio(usuarioExistente.getId(), usuarioExistente.getNombre(), usuarioExistente.getApellido(),
+                                   "fecha_nacimiento", usuarioExistente.getFecha_nacimiento().toString(), request.fechaNacimiento().toString(), ip, usuarioModificador.getId(),
+                                        usuarioModificador.getNombre(), usuarioModificador.getApellido());
+                }
+
+                registrarSiCambio(usuarioExistente.getId(), usuarioExistente.getNombre(), usuarioExistente.getApellido(),
+                                   "dpi", usuarioExistente.getDpi(), request.dpi(), ip, usuarioModificador.getId(),
+                                        usuarioModificador.getNombre(), usuarioModificador.getApellido());
+
+                registrarSiCambio(usuarioExistente.getId(), usuarioExistente.getNombre(), usuarioExistente.getApellido(),
+                                   "direccion", usuarioExistente.getDireccion(), request.direccion(), ip, usuarioModificador.getId(),
+                                        usuarioModificador.getNombre(), usuarioModificador.getApellido());
+
+                registrarSiCambio(usuarioExistente.getId(), usuarioExistente.getNombre(), usuarioExistente.getApellido(),
+                                   "telefono", usuarioExistente.getTelefono(), request.telefono(), ip, usuarioModificador.getId(),
+                                        usuarioModificador.getNombre(), usuarioModificador.getApellido());
+
+                registrarSiCambio(usuarioExistente.getId(), usuarioExistente.getNombre(), usuarioExistente.getApellido(),
+                                   "estado", usuarioExistente.getEstado(), request.estado(), ip, usuarioModificador.getId(),
+                                        usuarioModificador.getNombre(), usuarioModificador.getApellido());
+
+                usuarioExistente.setNombre(request.nombreUsuario());
+                usuarioExistente.setApellido(request.apellidoUsuario());
+                usuarioExistente.setFecha_nacimiento(request.fechaNacimiento());
+                usuarioExistente.setDpi(request.dpi());
+                usuarioExistente.setDireccion(request.direccion());
+                usuarioExistente.setTelefono(request.telefono());
+                usuarioExistente.setEstado(request.estado());
+
+                usuarioRepository.save(usuarioExistente);
+        }
+
+        private void registrarSiCambio(Long idUsuarioModificado, String nombreUsuarioModificado,
+                        String apellidoUsuarioModificado,
+                        String campoModificado, String valorAnterior, String valorNuevo,
+                        String ipUsuarioModificador,
+                        Long idUsuarioModificador, String nombreUsuarioModificador, String apellidoUsuarioModificador) {
+                boolean cambio = valorAnterior == null
+                                ? valorNuevo != null
+                                : !valorAnterior.equals(valorNuevo);
+
+                if (cambio) {
+                        bitacoraClient.registrarCambioUsuario(
+                                        idUsuarioModificado,
+                                        nombreUsuarioModificado,
+                                        apellidoUsuarioModificado,
+                                        campoModificado,
+                                        valorAnterior,
+                                        valorNuevo,
+                                        "ACTUALIZACIÓN",
+                                        ipUsuarioModificador,
+                                        idUsuarioModificador,
+                                        nombreUsuarioModificador,
+                                        apellidoUsuarioModificador);
+                }
+        }
+
+        private String obtenerCorreoUsuarioAutenticado() {
+                Usuario usuario = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+                return usuario.getCorreo();
         }
 
         /* Método para crear el usuario admin */

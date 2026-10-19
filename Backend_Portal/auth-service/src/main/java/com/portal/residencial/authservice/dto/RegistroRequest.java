@@ -21,4 +21,5 @@ public class RegistroRequest {
     private String telefono;
     private Long id_rol;
     private String direccion;
+    private String estado;
 }

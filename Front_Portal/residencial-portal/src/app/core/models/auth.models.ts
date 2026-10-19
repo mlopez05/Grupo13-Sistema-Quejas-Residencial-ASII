@@ -47,3 +47,13 @@ export interface AuthSession {
   usuario: string;
   rol: string;
 }
+
+export interface RecuperacionRequest{
+  usuario: string;
+}
+
+
+export interface ResetPasswordRequest {
+  token: string;
+  nuevaPassword: string;
+}

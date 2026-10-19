@@ -45,6 +45,7 @@ public class Usuario implements UserDetails{
     private String direccion;
     private LocalDate fecha_registro;
     private LocalTime hora_registro;
+    private String estado;
 
     // Métodos requeridos por UserDetails
 

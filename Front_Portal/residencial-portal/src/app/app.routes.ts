@@ -53,10 +53,17 @@ export const routes: Routes = [
       },
       {
         path: 'restaurar-clave',
-          loadComponent: () =>
-            import('./features/auth/forgot-password/forgot-password')
-              .then(m => m.ForgotPassword)
+        loadComponent: () =>
+          import('./features/auth/forgot-password/forgot-password')
+            .then(m => m.ForgotPassword)
+      },
+      {
+        path: 'restablecer-password',
+        loadComponent: () =>
+          import('./features/auth/reset-password/reset-password')
+            .then(m => m.ResetPassword),
       }
+
     ],
   },
 
