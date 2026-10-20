@@ -1,9 +1,12 @@
-import { HttpInterceptorFn } from '@angular/common/http';
+import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { catchError, throwError } from 'rxjs';
 import { SessionService } from '../services/session';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const sessionService = inject(SessionService);
+  const router = inject(Router);
   const session = sessionService.obtenerSesion();
 
   const esRutaPublica =
@@ -20,5 +23,15 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     },
   });
 
-  return next(requestConToken);
+  /* SI LA SESIÓN VENCIÓ SE CIERRA */
+  return next(requestConToken).pipe(
+    catchError((error: HttpErrorResponse) => {
+      if (error.status === 401) {
+        sessionService.cerrarSesion();
+        router.navigate(['/login']);
+      }
+
+      return throwError(() => error);
+    })
+  );
 };

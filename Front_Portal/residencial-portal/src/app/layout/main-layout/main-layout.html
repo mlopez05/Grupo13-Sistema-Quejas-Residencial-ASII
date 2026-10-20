@@ -1,10 +1,10 @@
 <div class="min-h-screen bg-slate-100">
 
-  <!-- Sidebar -->
+  <!-- MENÚ LATERAL -->
   <aside
     class="fixed inset-y-0 left-0 z-40 flex w-72 flex-col bg-slate-950 text-white">
 
-    <!-- Branding -->
+    <!-- LOGO -->
     <div class="flex h-20 items-center gap-3 border-b border-slate-800 px-6">
 
       <div
@@ -35,7 +35,7 @@
 
     </div>
 
-    <!-- Navegación -->
+    <!-- NAVEGACIÓN -->
     <nav class="flex-1 space-y-2 px-4 py-6">
 
       <p class="mb-3 px-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
@@ -48,7 +48,7 @@
         [routerLinkActiveOptions]="{ exact: true }"
         class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white">
 
-        <span>🏠</span>
+        <lucide-icon [img]="icono.House" class="h-5 w-5" />
         Dashboard
       </a>
 
@@ -57,7 +57,7 @@
         routerLinkActive="bg-blue-600 text-white"
         class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white">
 
-        <span>📋</span>
+        <lucide-icon [img]="icono.ClipboardList" class="h-5 w-5" />
         Mis casos
       </a>
 
@@ -66,7 +66,7 @@
         routerLinkActive="bg-blue-600 text-white"
         class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white">
 
-        <span>➕</span>
+        <lucide-icon [img]="icono.Plus" class="h-5 w-5" />
         Nuevo caso
       </a>
 
@@ -75,7 +75,7 @@
         routerLinkActive="bg-blue-600 text-white"
         class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white">
 
-        <span>🔔</span>
+        <lucide-icon [img]="icono.Megaphone" class="h-5 w-5" />
         Avisos
       </a>
 
@@ -88,13 +88,13 @@
         routerLinkActive="bg-blue-600 text-white"
         class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white">
 
-        <span>👤</span>
+        <lucide-icon [img]="icono.User" class="h-5 w-5" />
         Mi perfil
       </a>
 
     </nav>
 
-    <!-- Usuario -->
+    <!-- USUARIO -->
     <div class="border-t border-slate-800 p-4">
 
       <div class="mb-3 flex items-center gap-3 rounded-xl bg-slate-900 p-3">
@@ -121,7 +121,7 @@
         (click)="cerrarSesion()"
         class="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-400 transition hover:bg-red-500/10 hover:text-red-400">
 
-        <span>🚪</span>
+        <lucide-icon [img]="icono.LogOut" class="h-5 w-5" />
         Cerrar sesión
 
       </button>
@@ -130,13 +130,13 @@
 
   </aside>
 
-  <!-- Contenido -->
+  <!-- CONTENIDO -->
   <main class="min-h-screen pl-72">
 
-  <!-- Header -->
+  <!-- ENCABEZADO -->
   <header class="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-slate-200 bg-white px-8">
 
-    <!-- Título -->
+    <!-- TÍTULO -->
     <div>
       <p class="text-sm text-slate-500">
         Portal Residencial
@@ -147,34 +147,13 @@
       </h1>
     </div>
 
-    <!-- Acciones -->
+    <!-- ACCIONES -->
     <div class="flex items-center gap-5">
 
-      <!-- Notificaciones -->
-      <button
-        type="button"
-        class="relative flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
-        aria-label="Notificaciones">
+      <!-- NOTIFICACIONES -->
+      <app-campana-notificaciones />
 
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke-width="1.8"
-          stroke="currentColor"
-          class="h-5 w-5">
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M14.857 17.082a23.848 23.848 0 0 1-5.714 0A2.25 2.25 0 0 1 7.5 14.86V11.25a4.5 4.5 0 0 1 9 0v3.61a2.25 2.25 0 0 1-1.643 2.222ZM9.75 20.25h4.5" />
-        </svg>
-
-        <!-- Indicador -->
-        <span class="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500"></span>
-
-      </button>
-
-      <!-- Usuario -->
+      <!-- USUARIO -->
       <div class="flex items-center gap-3 border-l border-slate-200 pl-5">
 
         <div class="text-right">
@@ -198,7 +177,7 @@
 
   </header>
 
-  <!-- Contenido -->
+  <!-- CONTENIDO -->
   <div class="p-8">
     <router-outlet></router-outlet>
   </div>

@@ -1,0 +1,173 @@
+<div class="space-y-6">
+
+  <!-- ENCABEZADO -->
+  <section class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+
+    <div>
+      <p class="text-sm font-medium text-blue-600">Administración</p>
+
+      <h2 class="mt-1 text-2xl font-bold tracking-tight text-slate-900">Catálogo de casos</h2>
+
+      <p class="mt-2 text-sm text-slate-500">
+        Categorías y tipos de incidente propios de este residencial, que el residente elige al registrar un caso.
+        Lo que no tiene casos se puede eliminar; lo que ya tiene casos solo se desactiva.
+      </p>
+    </div>
+
+    <button type="button" (click)="nuevaCategoria()"
+      class="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700">
+      <lucide-icon [img]="icono.Plus" class="h-4 w-4" />
+      Nueva categoría
+    </button>
+
+  </section>
+
+  @if (error) {
+  <p class="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+    <lucide-icon [img]="icono.CircleAlert" class="mt-0.5 h-4 w-4 shrink-0" />
+    {{ error }}
+  </p>
+  }
+
+  @if (cargando) {
+  <section class="rounded-2xl border border-slate-200 bg-white p-12 text-center text-sm text-slate-500 shadow-sm">
+    Cargando catálogo...
+  </section>
+  } @else {
+
+  <section class="grid gap-6 lg:grid-cols-2">
+
+    @for (categoria of categorias; track categoria.id) {
+    <article class="flex flex-col rounded-2xl border border-slate-200 bg-white shadow-sm"
+      [class.opacity-70]="!categoria.activo">
+
+      <header class="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <h3 class="font-semibold text-slate-900">{{ categoria.nombre }}</h3>
+            @if (!categoria.activo) {
+            <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-500">Inactiva</span>
+            }
+          </div>
+          <p class="mt-0.5 text-xs text-slate-500">
+            {{ tiposActivos(categoria) }} de {{ categoria.tipos.length }} tipos activos ·
+            {{ categoria.casos === 1 ? '1 caso' : categoria.casos + ' casos' }}
+          </p>
+        </div>
+
+        <div class="flex shrink-0 gap-1">
+          <button type="button" (click)="editarCategoria(categoria)"
+            class="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
+            [attr.aria-label]="'Editar categoría ' + categoria.nombre">
+            <lucide-icon [img]="icono.Pencil" class="h-4 w-4" />
+          </button>
+
+          <!-- SOLO SE PUEDE ELIMINAR SI NO TIENE CASOS -->
+          @if (categoria.casos === 0) {
+          <button type="button" (click)="eliminarCategoria(categoria)"
+            class="rounded-lg p-2 text-slate-500 transition hover:bg-red-50 hover:text-red-600"
+            [attr.aria-label]="'Eliminar categoría ' + categoria.nombre">
+            <lucide-icon [img]="icono.Trash2" class="h-4 w-4" />
+          </button>
+          }
+        </div>
+      </header>
+
+      <ul class="flex-1 divide-y divide-slate-100">
+        @for (tipo of categoria.tipos; track tipo.id) {
+        <li class="flex items-center justify-between gap-4 px-5 py-2.5 text-sm">
+          <span [class]="tipo.activo ? 'text-slate-700' : 'text-slate-400 line-through'">
+            {{ tipo.nombre }}
+            @if (tipo.casos > 0) {
+            <span class="ml-1 text-xs text-slate-400">({{ tipo.casos }})</span>
+            }
+          </span>
+          <div class="flex shrink-0 gap-1">
+            <button type="button" (click)="editarTipo(categoria, tipo)"
+              class="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-900"
+              [attr.aria-label]="'Editar tipo ' + tipo.nombre">
+              <lucide-icon [img]="icono.Pencil" class="h-3.5 w-3.5" />
+            </button>
+            @if (tipo.casos === 0) {
+            <button type="button" (click)="eliminarTipo(tipo)"
+              class="rounded-lg p-1.5 text-slate-400 transition hover:bg-red-50 hover:text-red-600"
+              [attr.aria-label]="'Eliminar tipo ' + tipo.nombre">
+              <lucide-icon [img]="icono.Trash2" class="h-3.5 w-3.5" />
+            </button>
+            }
+          </div>
+        </li>
+        } @empty {
+        <li class="px-5 py-4 text-sm text-slate-500">Sin tipos de incidente.</li>
+        }
+      </ul>
+
+      <footer class="border-t border-slate-100 px-5 py-3">
+        <button type="button" (click)="nuevoTipo(categoria)"
+          class="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-sm font-semibold text-blue-600 transition hover:bg-blue-50">
+          <lucide-icon [img]="icono.Plus" class="h-4 w-4" />
+          Agregar tipo
+        </button>
+      </footer>
+
+    </article>
+    } @empty {
+    <p class="rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500 shadow-sm lg:col-span-2">
+      Aún no hay categorías.
+    </p>
+    }
+
+  </section>
+
+  }
+
+</div>
+
+
+<!-- VENTANA DE CATEGORÍA O TIPO -->
+@if (edicion) {
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4" (click)="cerrar()">
+
+  <form (ngSubmit)="guardar()" (click)="$event.stopPropagation()"
+    class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+
+    <h3 class="text-lg font-semibold text-slate-900">{{ tituloEdicion }}</h3>
+
+    @if (edicion.clase === 'tipo') {
+    <p class="mt-1 text-sm text-slate-500">Categoría: {{ categoriaDeEdicion }}</p>
+    }
+
+    <div class="mt-5 space-y-4">
+
+      <div>
+        <label for="nombre-catalogo" class="mb-1.5 block text-sm font-medium text-slate-700">Nombre</label>
+        <input id="nombre-catalogo" name="nombre" type="text" maxlength="100" required [(ngModel)]="edicion.nombre"
+          class="block w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
+      </div>
+
+      <label class="flex items-center gap-3 text-sm text-slate-700">
+        <input name="activo" type="checkbox" [(ngModel)]="edicion.activo" class="h-4 w-4 rounded border-slate-300" />
+        Activo (se ofrece al registrar casos)
+      </label>
+
+    </div>
+
+    @if (errorEdicion) {
+    <p class="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{{ errorEdicion }}</p>
+    }
+
+    <div class="mt-6 flex justify-end gap-3">
+      <button type="button" (click)="cerrar()" [disabled]="guardando"
+        class="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-100">
+        Cancelar
+      </button>
+      <button type="submit" [disabled]="guardando"
+        class="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50">
+        {{ guardando ? 'Guardando...' : 'Guardar' }}
+      </button>
+    </div>
+
+  </form>
+
+</div>
+}

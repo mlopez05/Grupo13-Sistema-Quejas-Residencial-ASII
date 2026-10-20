@@ -1,0 +1,37 @@
+<div class="space-y-6">
+
+  <!-- ENCABEZADO -->
+  <section>
+    <p class="text-sm font-medium text-blue-600">Reportería</p>
+
+    <h2 class="mt-1 text-2xl font-bold tracking-tight text-slate-900">Reportes</h2>
+
+    <p class="mt-2 text-sm text-slate-500">
+      Indicadores de atención de casos{{ esAdministrador ? ' y auditoría de las bitácoras del sistema' : '' }}.
+    </p>
+  </section>
+
+  @if (esAdministrador) {
+  <nav class="flex gap-1 border-b border-slate-200">
+    <button type="button" (click)="pestana = 'casos'"
+      [class]="'-mb-px flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-semibold transition ' +
+        (pestana === 'casos' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800')">
+      <lucide-icon [img]="icono.ChartColumn" class="h-4 w-4" />
+      Casos
+    </button>
+    <button type="button" (click)="pestana = 'auditoria'"
+      [class]="'-mb-px flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-semibold transition ' +
+        (pestana === 'auditoria' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800')">
+      <lucide-icon [img]="icono.ShieldCheck" class="h-4 w-4" />
+      Auditoría
+    </button>
+  </nav>
+  }
+
+  @if (pestana === 'casos') {
+  <app-reporte-casos />
+  } @else {
+  <app-reporte-auditoria />
+  }
+
+</div>

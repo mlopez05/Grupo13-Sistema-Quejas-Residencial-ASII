@@ -7,10 +7,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.portal.residencial.authservice.dto.CambiarClaveRequest;
 import com.portal.residencial.authservice.dto.CorreoRequest;
 import com.portal.residencial.authservice.dto.LoginRequest;
 import com.portal.residencial.authservice.dto.LoginResponse;
@@ -49,7 +51,7 @@ public class AuthController {
         Usuario usuario = (Usuario) userDetails;
         bitacoraClient.registrarSesion(usuario, httpRequest.getRemoteAddr(), "INICIO_SESION");
 
-        return ResponseEntity.ok(new LoginResponse(token, request.usuario(), rol));
+        return ResponseEntity.ok(new LoginResponse(token, request.usuario(), rol, usuario.requiereCambioClave()));
     }
 
     @PostMapping("/logout")
@@ -66,6 +68,14 @@ public class AuthController {
     public ResponseEntity<Void> forgotPassword(@Valid @RequestBody CorreoRequest request) {
         usuarioService.solicitarRecuperacion(request.usuario());
         return ResponseEntity.ok().build();
+    }
+
+    /* EL USUARIO CAMBIA SU CONTRASEÑA DESDE SU PERFIL */
+    @PutMapping("/change-password")
+    public ResponseEntity<Void> changePassword(@Valid @RequestBody CambiarClaveRequest request,
+            HttpServletRequest httpRequest) {
+        usuarioService.cambiarClave(request, httpRequest.getRemoteAddr());
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/reset-password")

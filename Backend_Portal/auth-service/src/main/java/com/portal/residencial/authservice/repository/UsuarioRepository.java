@@ -1,5 +1,6 @@
 package com.portal.residencial.authservice.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,6 +13,8 @@ public interface UsuarioRepository  extends JpaRepository<Usuario, Long>{
     Optional<Usuario> findByDpi(String dpi);
 
     Optional<Usuario> findByCorreoAndClave(String correo, String clave);
+
+    List<Usuario> findByRol_NombreOrderByIdAsc(String nombreRol);
 
     
 }

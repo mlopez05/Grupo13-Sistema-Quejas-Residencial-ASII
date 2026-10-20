@@ -38,7 +38,7 @@ public class NotificacionClient {
 
             restTemplate.postForEntity(notificacionesUrl + "/notificaciones", request, Void.class);
         } catch (Exception e) {
-            // No bloquear el flujo de solicitarRecuperacion si notificaciones-service falla
+            /* SI FALLA EL ENVÍO NO SE DETIENE EL PROCESO */
             log.error("No se pudo enviar el correo de recuperación a {}: {}", correo, e.getMessage());
         }
     }

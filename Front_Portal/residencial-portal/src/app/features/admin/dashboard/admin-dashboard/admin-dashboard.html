@@ -1,37 +1,123 @@
 <div class="space-y-8">
 
-  <!-- Bienvenida -->
+  <!-- BIENVENIDA -->
   <section class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
 
     <div>
       <p class="text-sm font-medium text-blue-600">
-        Panel administrativo
+        Panel administrativo · {{ rol }}
       </p>
 
       <h2 class="mt-1 text-2xl font-bold tracking-tight text-slate-900">
-        Bienvenido, {{ session?.rol }}
+        Bienvenido, {{ session?.usuario }}
       </h2>
 
       <p class="mt-2 text-sm text-slate-500">
-        Aquí tienes un resumen de la actividad del residencial.
+        {{ subtitulo }}
       </p>
     </div>
 
-    @if (session?.rol === 'Administrador') {
-      <a
-        routerLink="/admin/usuarios"
-        class="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700">
-
-        <span>+</span>
-        Gestionar usuarios
-
-      </a>
+    @if (esAdministrador) {
+    <a
+      routerLink="/admin/usuarios"
+      class="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700">
+      Gestionar usuarios
+    </a>
+    } @else {
+    <a
+      routerLink="/admin/casos"
+      class="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700">
+      Ir a la bandeja
+    </a>
     }
 
   </section>
 
 
-  <!-- Usuarios -->
+  @if (cargando) {
+
+  <section class="rounded-2xl border border-slate-200 bg-white p-12 text-center text-sm text-slate-500 shadow-sm">
+    Cargando resumen...
+  </section>
+
+  } @else if (errorCarga) {
+
+  <section class="rounded-2xl border border-slate-200 bg-white p-12 text-center shadow-sm">
+    <p class="text-sm text-red-600">{{ errorCarga }}</p>
+
+    <button type="button" (click)="cargar()"
+      class="mt-4 rounded-lg px-4 py-2 text-xs font-semibold text-blue-600 transition hover:bg-blue-50">
+      Reintentar
+    </button>
+  </section>
+
+  } @else {
+
+  <!-- AVISO DE NOVEDADES -->
+  @if (totalConNovedad > 0) {
+  <a routerLink="/admin/casos" [queryParams]="{ estado: 'todos' }"
+    class="flex items-center gap-3 rounded-2xl border border-blue-200 bg-blue-50 px-5 py-4 text-sm text-blue-800 transition hover:bg-blue-100">
+    <lucide-icon [img]="icono.Bell" class="h-5 w-5 shrink-0" />
+    <span>
+      <span class="font-semibold">{{ totalConNovedad }} caso(s) con novedades sin revisar.</span>
+      Están resaltados en la bandeja.
+    </span>
+  </a>
+  }
+
+
+  <!-- CASOS -->
+  <section>
+
+    <div class="mb-4">
+      <h3 class="font-semibold text-slate-900">
+        Casos
+      </h3>
+
+      <p class="mt-1 text-sm text-slate-500">
+        {{ casos.length }} caso(s) {{ rol === 'Analista' ? 'asignados a ti' : 'en total' }}. Haz clic en una tarjeta para ver el detalle.
+      </p>
+    </div>
+
+    <div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+
+      @for (tarjeta of tarjetasCasos; track tarjeta.titulo) {
+      <a routerLink="/admin/casos" [queryParams]="{ estado: tarjeta.estado ?? 'todos' }"
+        [class]="'rounded-2xl border bg-white p-6 shadow-sm transition hover:shadow-md ' +
+          (tarjeta.destacar ? 'border-amber-300 ring-2 ring-amber-200' : 'border-slate-200 hover:border-blue-200')">
+
+        <div class="flex items-center justify-between">
+
+          <div>
+            <p class="text-sm font-medium text-slate-500">
+              {{ tarjeta.titulo }}
+            </p>
+
+            <p class="mt-2 text-3xl font-bold text-slate-900">
+              {{ tarjeta.valor }}
+            </p>
+          </div>
+
+          <div [class]="'flex h-11 w-11 items-center justify-center rounded-xl ' + tarjeta.claseIcono">
+            <lucide-icon [img]="tarjeta.icono" class="h-5 w-5" />
+          </div>
+
+        </div>
+
+        <p class="mt-4 text-xs text-slate-400">
+          {{ tarjeta.detalle }}
+        </p>
+
+      </a>
+      }
+
+    </div>
+
+  </section>
+
+
+  <!-- USUARIOS -->
+  @if (esAdministrador) {
   <section>
 
     <div class="mb-4">
@@ -44,208 +130,129 @@
       </p>
     </div>
 
-    <div class="grid gap-5 sm:grid-cols-3">
+    <div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
 
-      <!-- Total -->
-      <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      @for (tarjeta of tarjetasUsuarios; track tarjeta.titulo) {
+      <a routerLink="/admin/usuarios"
+        class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-blue-200 hover:shadow-md">
 
-        <p class="text-sm font-medium text-slate-500">
-          Total de usuarios
-        </p>
+        <div class="flex items-center justify-between">
 
-        <p class="mt-2 text-3xl font-bold text-slate-900">
-          {{ resumen.usuarios }}
-        </p>
+          <div>
+            <p class="text-sm font-medium text-slate-500">
+              {{ tarjeta.titulo }}
+            </p>
 
-        <p class="mt-4 text-xs text-slate-400">
-          Usuarios registrados
-        </p>
+            <p class="mt-2 text-3xl font-bold text-slate-900">
+              {{ tarjeta.valor }}
+            </p>
+          </div>
 
-      </div>
+          <div [class]="'flex h-11 w-11 items-center justify-center rounded-xl ' + tarjeta.claseIcono">
+            <lucide-icon [img]="tarjeta.icono" class="h-5 w-5" />
+          </div>
 
-      <!-- Residentes -->
-      <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-
-        <p class="text-sm font-medium text-slate-500">
-          Residentes
-        </p>
-
-        <p class="mt-2 text-3xl font-bold text-slate-900">
-          {{ resumen.residentes }}
-        </p>
+        </div>
 
         <p class="mt-4 text-xs text-slate-400">
-          Usuarios residenciales
+          {{ tarjeta.detalle }}
         </p>
 
-      </div>
-
-      <!-- Administrativos -->
-      <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-
-        <p class="text-sm font-medium text-slate-500">
-          Administrativos
-        </p>
-
-        <p class="mt-2 text-3xl font-bold text-slate-900">
-          {{ resumen.administrativos }}
-        </p>
-
-        <p class="mt-4 text-xs text-slate-400">
-          Personal del residencial
-        </p>
-
-      </div>
+      </a>
+      }
 
     </div>
 
   </section>
+  }
 
 
-  <!-- Casos -->
-  <section>
-
-    <div class="mb-4">
-      <h3 class="font-semibold text-slate-900">
-        Casos
-      </h3>
-
-      <p class="mt-1 text-sm text-slate-500">
-        Estado general de los casos reportados.
-      </p>
-    </div>
-
-    <div class="grid gap-5 sm:grid-cols-3">
-
-      <!-- Pendientes -->
-      <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-
-        <div class="flex items-center justify-between">
-
-          <div>
-            <p class="text-sm font-medium text-slate-500">
-              Pendientes
-            </p>
-
-            <p class="mt-2 text-3xl font-bold text-slate-900">
-              {{ resumen.casosPendientes }}
-            </p>
-          </div>
-
-          <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50">
-            ⏳
-          </div>
-
-        </div>
-
-        <p class="mt-4 text-xs text-slate-400">
-          Requieren atención
-        </p>
-
-      </div>
-
-
-      <!-- En proceso -->
-      <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-
-        <div class="flex items-center justify-between">
-
-          <div>
-            <p class="text-sm font-medium text-slate-500">
-              En proceso
-            </p>
-
-            <p class="mt-2 text-3xl font-bold text-slate-900">
-              {{ resumen.casosEnProceso }}
-            </p>
-          </div>
-
-          <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50">
-            🔄
-          </div>
-
-        </div>
-
-        <p class="mt-4 text-xs text-slate-400">
-          Siendo atendidos
-        </p>
-
-      </div>
-
-
-      <!-- Resueltos -->
-      <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-
-        <div class="flex items-center justify-between">
-
-          <div>
-            <p class="text-sm font-medium text-slate-500">
-              Resueltos
-            </p>
-
-            <p class="mt-2 text-3xl font-bold text-slate-900">
-              {{ resumen.casosResueltos }}
-            </p>
-          </div>
-
-          <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50">
-            ✓
-          </div>
-
-        </div>
-
-        <p class="mt-4 text-xs text-slate-400">
-          Casos solucionados
-        </p>
-
-      </div>
-
-    </div>
-
-  </section>
-
-
-  <!-- Actividad reciente -->
+  <!-- ACTIVIDAD RECIENTE -->
   <section class="rounded-2xl border border-slate-200 bg-white shadow-sm">
 
-    <div class="border-b border-slate-200 px-6 py-5">
+    <div class="flex items-center justify-between border-b border-slate-200 px-6 py-5">
 
-      <h3 class="font-semibold text-slate-900">
-        Actividad reciente
-      </h3>
+      <div>
+        <h3 class="font-semibold text-slate-900">
+          Actividad reciente
+        </h3>
 
-      <p class="mt-1 text-sm text-slate-500">
-        Últimos movimientos registrados en el portal.
-      </p>
+        <p class="mt-1 text-sm text-slate-500">
+          Casos con los movimientos más recientes.
+        </p>
+      </div>
+
+      <a routerLink="/admin/casos" class="text-sm font-semibold text-blue-600 hover:text-blue-700">
+        Ver bandeja
+      </a>
 
     </div>
 
     <div class="divide-y divide-slate-100">
 
-      @for (actividad of actividadReciente; track actividad.fecha) {
+      @for (caso of recientes; track caso.id) {
 
-        <div class="flex items-center justify-between gap-4 px-6 py-5">
+      <a [routerLink]="['/admin/casos', caso.id]"
+        [class]="'flex flex-col gap-3 border-l-4 px-6 py-4 transition sm:flex-row sm:items-center sm:justify-between ' + claseFilaReciente(caso)">
 
-          <div>
-            <p class="text-sm font-medium text-slate-900">
-              {{ actividad.descripcion }}
-            </p>
+        <div class="min-w-0">
 
-            <p class="mt-1 text-sm text-slate-500">
-              {{ actividad.detalle }}
-            </p>
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="font-mono text-xs font-semibold text-blue-600">{{ caso.numeroCaso }}</span>
+
+            @switch (novedad(caso)) {
+            @case ('nuevo') {
+            <span class="rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-950">
+              Nuevo
+            </span>
+            }
+            @case ('actualizado') {
+            <span class="rounded-full bg-blue-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+              Novedad
+            </span>
+            }
+            }
           </div>
 
-          <span class="shrink-0 text-xs text-slate-400">
-            {{ actividad.fecha }}
+          <p class="mt-1 text-sm font-medium text-slate-900">
+            {{ caso.tipoIncidente }}
+          </p>
+
+          <p class="mt-0.5 text-xs text-slate-500">
+            {{ caso.nombreResidente }}
+            @if (rol !== 'Analista') {
+            · {{ caso.nombreAnalista || 'Sin asignar' }}
+            }
+          </p>
+
+        </div>
+
+        <div class="flex shrink-0 items-center gap-4">
+
+          <span class="text-xs text-slate-400">
+            {{ caso.fechaActualizacion | date: 'dd/MM/yyyy HH:mm' }}
+          </span>
+
+          <span [class]="'whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold ' + estiloEstado[caso.estado]">
+            {{ caso.estadoDescripcion }}
           </span>
 
         </div>
+
+      </a>
+
+      } @empty {
+
+      <div class="px-6 py-12 text-center text-sm text-slate-500">
+        No hay casos registrados todavía.
+      </div>
 
       }
 
     </div>
 
   </section>
+
+  }
 
 </div>

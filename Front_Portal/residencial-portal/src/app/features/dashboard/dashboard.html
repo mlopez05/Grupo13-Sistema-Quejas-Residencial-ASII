@@ -1,6 +1,6 @@
 <div class="space-y-8">
 
-  <!-- Bienvenida -->
+  <!-- BIENVENIDA -->
   <section class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
 
     <div>
@@ -13,7 +13,7 @@
       </h2>
 
       <p class="mt-2 text-sm text-slate-500">
-        Aquí tienes un resumen de la actividad de tu residencial.
+        Aquí tienes un resumen de tus casos.
       </p>
     </div>
 
@@ -29,141 +29,89 @@
   </section>
 
 
-  <!-- Resumen -->
+  @if (cargando) {
+
+  <section class="rounded-2xl border border-slate-200 bg-white p-12 text-center text-sm text-slate-500 shadow-sm">
+    Cargando tu resumen...
+  </section>
+
+  } @else if (errorCarga) {
+
+  <section class="rounded-2xl border border-slate-200 bg-white p-12 text-center shadow-sm">
+    <p class="text-sm text-red-600">{{ errorCarga }}</p>
+
+    <button type="button" (click)="cargarCasos()"
+      class="mt-4 rounded-lg px-4 py-2 text-xs font-semibold text-blue-600 transition hover:bg-blue-50">
+      Reintentar
+    </button>
+  </section>
+
+  } @else {
+
+  <!-- AVISO DE NOVEDADES -->
+  @if (totalConNovedad > 0) {
+  <a routerLink="/casos"
+    class="flex items-center gap-3 rounded-2xl border border-blue-200 bg-blue-50 px-5 py-4 text-sm text-blue-800 transition hover:bg-blue-100">
+    <lucide-icon [img]="icono.Bell" class="h-5 w-5 shrink-0" />
+    <span>
+      <span class="font-semibold">{{ totalConNovedad }} caso(s) con novedades.</span>
+      Revisa el seguimiento para ver qué cambió.
+    </span>
+  </a>
+  }
+
+
+  <!-- RESUMEN -->
   <section class="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
 
-    <!-- Total -->
-    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    @for (tarjeta of tarjetas; track tarjeta.titulo) {
+    <a [routerLink]="'/casos'" [queryParams]="tarjeta.estado ? { estado: tarjeta.estado } : {}"
+      class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-blue-200 hover:shadow-md">
 
       <div class="flex items-center justify-between">
 
         <div>
           <p class="text-sm font-medium text-slate-500">
-            Total de casos
+            {{ tarjeta.titulo }}
           </p>
 
           <p class="mt-2 text-3xl font-bold text-slate-900">
-            {{ resumen.total }}
+            {{ tarjeta.valor }}
           </p>
         </div>
 
-        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-          📋
+        <div [class]="'flex h-11 w-11 items-center justify-center rounded-xl ' + tarjeta.claseIcono">
+          <lucide-icon [img]="tarjeta.icono" class="h-5 w-5" />
         </div>
 
       </div>
 
       <p class="mt-4 text-xs text-slate-400">
-        Casos registrados
+        {{ tarjeta.detalle }}
       </p>
 
-    </div>
-
-
-    <!-- Pendientes -->
-    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-
-      <div class="flex items-center justify-between">
-
-        <div>
-          <p class="text-sm font-medium text-slate-500">
-            Pendientes
-          </p>
-
-          <p class="mt-2 text-3xl font-bold text-slate-900">
-            {{ resumen.pendientes }}
-          </p>
-        </div>
-
-        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
-          ⏳
-        </div>
-
-      </div>
-
-      <p class="mt-4 text-xs text-slate-400">
-        Requieren atención
-      </p>
-
-    </div>
-
-
-    <!-- En proceso -->
-    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-
-      <div class="flex items-center justify-between">
-
-        <div>
-          <p class="text-sm font-medium text-slate-500">
-            En proceso
-          </p>
-
-          <p class="mt-2 text-3xl font-bold text-slate-900">
-            {{ resumen.enProceso }}
-          </p>
-        </div>
-
-        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
-          🔄
-        </div>
-
-      </div>
-
-      <p class="mt-4 text-xs text-slate-400">
-        Siendo atendidos
-      </p>
-
-    </div>
-
-
-    <!-- Resueltos -->
-    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-
-      <div class="flex items-center justify-between">
-
-        <div>
-          <p class="text-sm font-medium text-slate-500">
-            Resueltos
-          </p>
-
-          <p class="mt-2 text-3xl font-bold text-slate-900">
-            {{ resumen.resueltos }}
-          </p>
-        </div>
-
-        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
-          ✓
-        </div>
-
-      </div>
-
-      <p class="mt-4 text-xs text-slate-400">
-        Casos solucionados
-      </p>
-
-    </div>
+    </a>
+    }
 
   </section>
 
 
-  <!-- Casos recientes -->
+  <!-- CASOS RECIENTES -->
   <section class="rounded-2xl border border-slate-200 bg-white shadow-sm">
 
     <div class="flex items-center justify-between border-b border-slate-200 px-6 py-5">
 
       <div>
         <h3 class="font-semibold text-slate-900">
-          Casos recientes
+          Actividad reciente
         </h3>
 
         <p class="mt-1 text-sm text-slate-500">
-          Últimos reportes realizados
+          Tus casos con movimientos más recientes
         </p>
       </div>
 
-      <a
-        routerLink="/casos"
-        class="text-sm font-semibold text-blue-600 hover:text-blue-700">
+      <a routerLink="/casos" class="text-sm font-semibold text-blue-600 hover:text-blue-700">
         Ver todos
       </a>
 
@@ -172,77 +120,74 @@
 
     <div class="divide-y divide-slate-100">
 
-      @for (caso of casosRecientes; track caso.numero) {
+      @for (caso of recientes; track caso.id) {
 
-        <div class="flex flex-col gap-4 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+      <a [routerLink]="['/casos', caso.id]"
+        [class]="'flex flex-col gap-4 border-l-4 px-6 py-5 transition sm:flex-row sm:items-center sm:justify-between ' +
+          (novedad(caso) ? 'border-blue-500 bg-blue-50 hover:bg-blue-100' : 'border-transparent hover:bg-slate-50')">
 
-          <div class="flex items-center gap-4">
+        <div class="flex items-center gap-4">
 
-            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
-              📋
-            </div>
-
-            <div>
-
-              <div class="flex items-center gap-2">
-
-                <span class="text-xs font-medium text-slate-400">
-                  {{ caso.numero }}
-                </span>
-
-                <span class="text-xs text-slate-300">
-                  •
-                </span>
-
-                <span class="text-xs text-slate-400">
-                  {{ caso.categoria }}
-                </span>
-
-              </div>
-
-              <h4 class="mt-1 font-medium text-slate-900">
-                {{ caso.titulo }}
-              </h4>
-
-            </div>
-
+          <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
+            <lucide-icon [img]="icono.ClipboardList" class="h-5 w-5" />
           </div>
 
+          <div class="min-w-0">
 
-          <div class="flex items-center justify-between gap-6 sm:justify-end">
-
-            <span class="text-xs text-slate-400">
-              {{ caso.fecha }}
-            </span>
-
-            @if (caso.estado === 'Pendiente') {
-
-              <span class="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-600">
-                Pendiente
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="font-mono text-xs font-medium text-slate-400">
+                {{ caso.numeroCaso }}
               </span>
 
-            } @else if (caso.estado === 'En proceso') {
+              <span class="text-xs text-slate-300">•</span>
 
-              <span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600">
-                En proceso
+              <span class="text-xs text-slate-400">
+                {{ caso.categoria }}
               </span>
 
-            } @else {
-
-              <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600">
-                Resuelto
+              @if (novedad(caso)) {
+              <span class="rounded-full bg-blue-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+                Novedad
               </span>
+              }
+            </div>
 
-            }
+            <h4 class="mt-1 font-medium text-slate-900">
+              {{ caso.tipoIncidente }}
+            </h4>
 
           </div>
 
         </div>
+
+
+        <div class="flex items-center justify-between gap-6 sm:justify-end">
+
+          <span class="text-xs text-slate-400">
+            {{ caso.fechaActualizacion | date: 'dd/MM/yyyy HH:mm' }}
+          </span>
+
+          <span [class]="'whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold ' + estiloEstado[caso.estado]">
+            {{ caso.estadoDescripcion }}
+          </span>
+
+        </div>
+
+      </a>
+
+      } @empty {
+
+      <div class="px-6 py-12 text-center text-sm text-slate-500">
+        Aún no has reportado casos.
+        <a routerLink="/casos/nuevo" class="font-semibold text-blue-600 hover:underline">Registra el primero</a>
+      </div>
 
       }
 
     </div>
 
   </section>
+
+  }
 
 </div>

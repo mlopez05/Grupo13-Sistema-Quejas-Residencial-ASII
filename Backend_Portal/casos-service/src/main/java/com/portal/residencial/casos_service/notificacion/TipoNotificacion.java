@@ -1,0 +1,13 @@
+package com.portal.residencial.casos_service.notificacion;
+
+/* TIPOS DE NOTIFICACIÓN */
+public enum TipoNotificacion {
+    CASO_CREADO,
+    CASO_ACTUALIZADO,
+    CASO_ASIGNADO,
+    CASO_AUTORIZADO_RECHAZADO,
+    CASO_FINALIZADO,
+    TRASLADO_AUTORIZACION,
+    AVANCE_REGISTRADO,
+    INFORMACION_AGREGADA
+}

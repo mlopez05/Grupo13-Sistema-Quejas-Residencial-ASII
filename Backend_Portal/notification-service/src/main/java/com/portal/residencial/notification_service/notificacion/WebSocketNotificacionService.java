@@ -1,7 +1,5 @@
 package com.portal.residencial.notification_service.notificacion;
 
-import java.time.LocalDateTime;
-
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -11,21 +9,12 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class WebSocketNotificacionService {
 
+    public static final String DESTINO = "/queue/notificaciones";
+
     private final SimpMessagingTemplate messagingTemplate;
-    private final PlantillaNotificacion plantilla;
 
-    public void enviarAlertaInterna(NotificacionRequest request) {
-        AlertaInterna alerta = new AlertaInterna(
-                plantilla.asunto(request.tipo(), request.datos()),
-                plantilla.cuerpo(request.tipo(), request.datos()),
-                LocalDateTime.now()
-        );
-        messagingTemplate.convertAndSend(
-                "/topic/notificaciones/" + request.correoDestinatario(),
-                alerta
-        );
+    /* ENVÍA LA ALERTA AL USUARIO */
+    public void enviarAlertaInterna(String correo, NotificacionResponse notificacion) {
+        messagingTemplate.convertAndSendToUser(correo, DESTINO, notificacion);
     }
-
-    public record AlertaInterna(String titulo, String mensaje, LocalDateTime fecha) {}
-
 }

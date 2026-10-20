@@ -1,7 +1,7 @@
 <div class="mx-auto w-full max-w-4xl px-6 py-10 lg:py-14">
   <div class="rounded-3xl bg-white shadow-xl shadow-slate-200/60 ring-1 ring-slate-200">
 
-    <!-- Header -->
+    <!-- ENCABEZADO -->
     <div class="border-b border-slate-200 px-6 py-8 sm:px-10">
       <div class="mx-auto max-w-2xl text-center">
         <div
@@ -23,10 +23,10 @@
       </div>
     </div>
 
-    <!-- Formulario -->
+    <!-- FORMULARIO -->
     <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-8 px-6 py-8 sm:px-10">
 
-      <!-- Datos personales -->
+      <!-- DATOS PERSONALES -->
       <section>
         <div class="mb-5">
           <h2 class="text-base font-semibold text-slate-900">
@@ -39,7 +39,7 @@
 
         <div class="grid gap-5 sm:grid-cols-2">
 
-          <!-- Nombre -->
+          <!-- NOMBRE -->
           <div>
             <label for="nombre" class="mb-2 block text-sm font-medium text-slate-700">
               Nombre <span class="text-red-500">*</span>
@@ -70,7 +70,7 @@
 
           </div>
 
-          <!-- Apellido -->
+          <!-- APELLIDO -->
           <div>
             <label for="apellido" class="mb-2 block text-sm font-medium text-slate-700">
               Apellido <span class="text-red-500">*</span>
@@ -101,7 +101,7 @@
 
           </div>
 
-          <!-- Fecha nacimiento -->
+          <!-- FECHA NACIMIENTO -->
           <div>
             <label for="fechaNacimiento" class="mb-2 block text-sm font-medium text-slate-700">
               Fecha de nacimiento <span class="text-red-500">*</span>
@@ -202,7 +202,7 @@
         </div>
       </section>
 
-      <!-- Datos de contacto -->
+      <!-- DATOS DE CONTACTO -->
       <section>
         <div class="mb-5">
           <h2 class="text-base font-semibold text-slate-900">
@@ -215,7 +215,7 @@
 
         <div class="space-y-5">
 
-          <!-- Correo -->
+          <!-- CORREO -->
           <div>
             <label for="correo" class="mb-2 block text-sm font-medium text-slate-700">
               Correo electrónico <span class="text-red-500">*</span>
@@ -245,7 +245,7 @@
             }
           </div>
 
-          <!-- Dirección -->
+          <!-- DIRECCIÓN -->
           <div>
             <label for="direccion" class="mb-2 block text-sm font-medium text-slate-700">
               Dirección <span class="text-red-500">*</span>
@@ -268,7 +268,7 @@
         </div>
       </section>
 
-      <!-- Seguridad -->
+      <!-- SEGURIDAD -->
       <section>
         <div class="mb-5">
           <h2 class="text-base font-semibold text-slate-900">
@@ -281,7 +281,7 @@
 
         <div class="grid gap-5 sm:grid-cols-2">
 
-          <!-- Contraseña -->
+          <!-- CONTRASEÑA -->
           <div>
             <label for="clave" class="mb-2 block text-sm font-medium text-slate-700">
               Contraseña <span class="text-red-500">*</span>
@@ -333,7 +333,7 @@
 
           </div>
 
-          <!-- Confirmar contraseña -->
+          <!-- CONFIRMAR CONTRASEÑA -->
           <div>
             <label for="confirmarClave" class="mb-2 block text-sm font-medium text-slate-700">
               Confirmar contraseña <span class="text-red-500">*</span>
@@ -385,7 +385,7 @@
         </div>
       </section>
 
-      <!-- Botón -->
+      <!-- BOTÓN -->
       <div class="border-t border-slate-200 pt-6">
         <button type="submit" [disabled]="registerForm.invalid"
           class="w-full rounded-xl bg-blue-600 px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/20 active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none">
@@ -408,8 +408,8 @@
 
         @if (registroExitoso) {
 
-        <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
-          <span class="text-2xl text-emerald-600">✓</span>
+        <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+          <lucide-icon [img]="icono.CircleCheck" class="h-7 w-7" />
         </div>
 
         <h2 class="mt-5 text-xl font-bold text-slate-900">
@@ -428,8 +428,8 @@
 
         } @else {
 
-        <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-100">
-          <span class="text-2xl font-bold text-red-600">!</span>
+        <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-100 text-red-600">
+          <lucide-icon [img]="icono.TriangleAlert" class="h-7 w-7" />
         </div>
 
         <h2 class="mt-5 text-xl font-bold text-slate-900">

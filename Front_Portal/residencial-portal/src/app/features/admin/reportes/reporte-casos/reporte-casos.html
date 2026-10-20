@@ -1,0 +1,401 @@
+<div class="space-y-6">
+
+  <!-- FILTROS -->
+  <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
+
+      <div>
+        <label for="desde" class="mb-1.5 block text-xs font-medium text-slate-600">Registrados desde</label>
+        <input id="desde" type="date" [(ngModel)]="filtro.desde" [max]="filtro.hasta || hoy"
+          class="block w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
+      </div>
+
+      <div>
+        <label for="hasta" class="mb-1.5 block text-xs font-medium text-slate-600">Hasta</label>
+        <input id="hasta" type="date" [(ngModel)]="filtro.hasta" [min]="filtro.desde" [max]="hoy"
+          class="block w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
+      </div>
+
+      <div>
+        <label for="estado" class="mb-1.5 block text-xs font-medium text-slate-600">Estado</label>
+        <select id="estado" [(ngModel)]="filtro.estado"
+          class="block w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10">
+          <option value="">Todos</option>
+          @for (estado of estados; track estado.valor) {
+          <option [value]="estado.valor">{{ estado.etiqueta }}</option>
+          }
+        </select>
+      </div>
+
+      <div>
+        <label for="categoria" class="mb-1.5 block text-xs font-medium text-slate-600">Categoría</label>
+        <select id="categoria" [(ngModel)]="filtro.idCategoria"
+          class="block w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10">
+          <option [ngValue]="undefined">Todas</option>
+          @for (categoria of categorias; track categoria.id) {
+          <option [ngValue]="categoria.id">{{ categoria.nombre }}</option>
+          }
+        </select>
+      </div>
+
+      <div>
+        <label for="analista" class="mb-1.5 block text-xs font-medium text-slate-600">Analista</label>
+        <select id="analista" [(ngModel)]="filtro.idAnalista"
+          class="block w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10">
+          <option [ngValue]="undefined">Todos</option>
+          @for (analista of analistas; track analista.id) {
+          <option [ngValue]="analista.id">{{ analista.nombre }} {{ analista.apellido }}</option>
+          }
+        </select>
+      </div>
+
+      <div>
+        <label for="dias" class="mb-1.5 block text-xs font-medium text-slate-600">Estancado tras (días)</label>
+        <input id="dias" type="number" min="1" max="365" [(ngModel)]="filtro.diasEstancado"
+          class="block w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
+      </div>
+
+    </div>
+
+    <div class="mt-4 flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:justify-end">
+
+      <button type="button" (click)="exportar('excel')" [disabled]="cargando || exportando !== null"
+        class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50">
+        <lucide-icon [img]="icono.FileSpreadsheet" class="h-4 w-4 text-emerald-600" />
+        {{ exportando === 'excel' ? 'Generando...' : 'Excel' }}
+      </button>
+
+      <button type="button" (click)="exportar('pdf')" [disabled]="cargando || exportando !== null"
+        class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50">
+        <lucide-icon [img]="icono.FileText" class="h-4 w-4 text-red-600" />
+        {{ exportando === 'pdf' ? 'Generando...' : 'PDF' }}
+      </button>
+
+      <button type="button" (click)="generar()" [disabled]="cargando"
+        class="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 disabled:opacity-50">
+        <lucide-icon [img]="icono.RefreshCw" class="h-4 w-4" />
+        {{ cargando ? 'Generando...' : 'Generar reporte' }}
+      </button>
+
+    </div>
+
+    @if (error) {
+    <p class="mt-4 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+      <lucide-icon [img]="icono.CircleAlert" class="mt-0.5 h-4 w-4 shrink-0" />
+      {{ error }}
+    </p>
+    }
+
+  </section>
+
+
+  @if (reporte; as r) {
+
+  <!-- INDICADORES PRINCIPALES -->
+  <section class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <p class="text-sm text-slate-500">Casos del período</p>
+      <p class="mt-2 text-3xl font-bold text-slate-900">{{ r.resumen.total }}</p>
+    </div>
+
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <p class="text-sm text-slate-500">Abiertos</p>
+      <p class="mt-2 text-3xl font-bold text-slate-900">{{ r.resumen.abiertos }}</p>
+    </div>
+
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <p class="text-sm text-slate-500">Finalizados</p>
+      <p class="mt-2 text-3xl font-bold text-slate-900">{{ r.resumen.finalizados }}</p>
+    </div>
+
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <p class="text-sm text-slate-500">Rechazados</p>
+      <p class="mt-2 text-3xl font-bold text-slate-900">{{ r.resumen.rechazados }}</p>
+      <p class="mt-1 text-xs text-slate-400">
+        {{ r.resumen.porcentajeRechazo === null ? 'Sin casos decididos' : r.resumen.porcentajeRechazo + '% de los decididos' }}
+      </p>
+    </div>
+
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <p class="text-sm text-slate-500">Sin asignar</p>
+      <p class="mt-2 text-3xl font-bold text-slate-900">{{ r.resumen.sinAsignar }}</p>
+    </div>
+
+  </section>
+
+
+  <!-- TIEMPOS DE ATENCIÓN -->
+  <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+
+    <h3 class="flex items-center gap-2 font-semibold text-slate-900">
+      <lucide-icon [img]="icono.Timer" class="h-5 w-5 text-slate-400" />
+      Tiempos promedio de atención
+    </h3>
+
+    <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="rounded-xl bg-slate-50 p-4">
+        <p class="text-xs text-slate-500">Registro → asignación</p>
+        <p class="mt-1 text-xl font-semibold text-slate-900">{{ formatearHoras(r.tiempos.registroAAsignacion) }}</p>
+      </div>
+      <div class="rounded-xl bg-slate-50 p-4">
+        <p class="text-xs text-slate-500">Asignación → solicitud de autorización</p>
+        <p class="mt-1 text-xl font-semibold text-slate-900">{{ formatearHoras(r.tiempos.asignacionASolicitud) }}</p>
+      </div>
+      <div class="rounded-xl bg-slate-50 p-4">
+        <p class="text-xs text-slate-500">Solicitud → decisión del supervisor</p>
+        <p class="mt-1 text-xl font-semibold text-slate-900">{{ formatearHoras(r.tiempos.solicitudADecision) }}</p>
+      </div>
+      <div class="rounded-xl bg-slate-50 p-4">
+        <p class="text-xs text-slate-500">Registro → cierre (total)</p>
+        <p class="mt-1 text-xl font-semibold text-slate-900">{{ formatearHoras(r.tiempos.registroACierre) }}</p>
+      </div>
+    </div>
+
+  </section>
+
+
+  <!-- CASOS POR ESTADO Y CATEGORÍA -->
+  <section class="grid gap-6 lg:grid-cols-2">
+
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <h3 class="font-semibold text-slate-900">Casos por estado</h3>
+
+      <ul class="mt-4 space-y-3">
+        @for (conteo of r.porEstado; track conteo.clave) {
+        <li [title]="conteo.etiqueta + ': ' + conteo.cantidad">
+          <div class="flex items-baseline justify-between gap-4 text-sm">
+            <span class="text-slate-700">{{ conteo.etiqueta }}</span>
+            <span class="font-semibold tabular-nums text-slate-900">{{ conteo.cantidad }}</span>
+          </div>
+          <div class="mt-1.5 h-2.5 rounded-r bg-slate-100">
+            <div class="serie-1 h-full rounded-r" [style.width.%]="ancho(conteo.cantidad, maximo(r.porEstado))"></div>
+          </div>
+        </li>
+        }
+      </ul>
+    </div>
+
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <h3 class="font-semibold text-slate-900">Casos por categoría</h3>
+
+      @if (r.porCategoria.length === 0) {
+      <p class="mt-4 text-sm text-slate-500">Sin casos en el período.</p>
+      } @else {
+      <ul class="mt-4 space-y-3">
+        @for (conteo of r.porCategoria; track conteo.clave) {
+        <li [title]="conteo.etiqueta + ': ' + conteo.cantidad">
+          <div class="flex items-baseline justify-between gap-4 text-sm">
+            <span class="text-slate-700">{{ conteo.etiqueta }}</span>
+            <span class="font-semibold tabular-nums text-slate-900">{{ conteo.cantidad }}</span>
+          </div>
+          <div class="mt-1.5 h-2.5 rounded-r bg-slate-100">
+            <div class="serie-1 h-full rounded-r" [style.width.%]="ancho(conteo.cantidad, maximo(r.porCategoria))"></div>
+          </div>
+        </li>
+        }
+      </ul>
+      }
+
+      @if (r.porTipoIncidente.length > 0) {
+      <h4 class="mt-6 border-t border-slate-100 pt-4 text-sm font-semibold text-slate-900">
+        Tipos de incidente más reportados
+      </h4>
+      <ul class="mt-3 space-y-2.5">
+        @for (conteo of r.porTipoIncidente; track conteo.clave) {
+        <li [title]="conteo.etiqueta + ': ' + conteo.cantidad">
+          <div class="flex items-baseline justify-between gap-4 text-xs">
+            <span class="text-slate-600">{{ conteo.etiqueta }}</span>
+            <span class="font-semibold tabular-nums text-slate-900">{{ conteo.cantidad }}</span>
+          </div>
+          <div class="mt-1 h-2 rounded-r bg-slate-100">
+            <div class="serie-1 h-full rounded-r" [style.width.%]="ancho(conteo.cantidad, maximo(r.porTipoIncidente))"></div>
+          </div>
+        </li>
+        }
+      </ul>
+      }
+    </div>
+
+  </section>
+
+
+  <!-- TENDENCIA MENSUAL -->
+  <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+
+    <div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+      <h3 class="font-semibold text-slate-900">Tendencia mensual</h3>
+
+      <div class="flex items-center gap-4 text-xs text-slate-600">
+        <span class="flex items-center gap-1.5"><span class="serie-1 h-2.5 w-2.5 rounded-sm"></span>Registrados</span>
+        <span class="flex items-center gap-1.5"><span class="serie-2 h-2.5 w-2.5 rounded-sm"></span>Cerrados</span>
+        <button type="button" (click)="verTablaTendencia = !verTablaTendencia"
+          class="rounded-lg px-2 py-1 font-semibold text-blue-600 hover:bg-blue-50">
+          {{ verTablaTendencia ? 'Ocultar tabla' : 'Ver tabla' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="relative mt-6">
+
+      <p class="absolute -top-4 left-0 text-[11px] tabular-nums text-slate-400">{{ maximoTendencia }}</p>
+
+      <div class="flex h-44 items-end gap-3 overflow-x-auto border-b border-slate-200 pb-px pt-2">
+        @for (mes of r.tendenciaMensual; track mes.mes) {
+        <div class="relative flex h-full min-w-10 flex-1 cursor-default flex-col items-center justify-end"
+          (mouseenter)="mesActivo = mes" (mouseleave)="mesActivo = null"
+          [attr.aria-label]="etiquetaMes(mes.mes) + ': ' + mes.registrados + ' registrados, ' + mes.cerrados + ' cerrados'">
+
+          @if (mesActivo === mes) {
+          <div class="pointer-events-none absolute bottom-full z-10 mb-1 whitespace-nowrap rounded-lg bg-slate-900 px-3 py-2 text-xs text-white shadow-lg">
+            <p class="font-semibold">{{ etiquetaMes(mes.mes) }}</p>
+            <p class="mt-1 flex items-center gap-1.5"><span class="serie-1 h-2 w-2 rounded-sm"></span>Registrados: {{ mes.registrados }}</p>
+            <p class="flex items-center gap-1.5"><span class="serie-2 h-2 w-2 rounded-sm"></span>Cerrados: {{ mes.cerrados }}</p>
+          </div>
+          }
+
+          <div class="flex h-full w-full items-end justify-center gap-0.5 rounded-t-md px-1 transition"
+            [class.bg-slate-50]="mesActivo === mes">
+            <div class="serie-1 w-3 rounded-t" [style.height.%]="alto(mes.registrados)"></div>
+            <div class="serie-2 w-3 rounded-t" [style.height.%]="alto(mes.cerrados)"></div>
+          </div>
+        </div>
+        }
+      </div>
+
+      <div class="flex gap-3 overflow-x-auto pt-2">
+        @for (mes of r.tendenciaMensual; track mes.mes) {
+        <p class="min-w-10 flex-1 text-center text-[11px] text-slate-500">{{ etiquetaMes(mes.mes) }}</p>
+        }
+      </div>
+
+    </div>
+
+    @if (verTablaTendencia) {
+    <div class="mt-4 overflow-x-auto">
+      <table class="w-full text-left text-sm">
+        <thead class="border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500">
+          <tr>
+            <th class="py-2 pr-4 font-semibold">Mes</th>
+            <th class="py-2 pr-4 text-right font-semibold">Registrados</th>
+            <th class="py-2 text-right font-semibold">Cerrados</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          @for (mes of r.tendenciaMensual; track mes.mes) {
+          <tr>
+            <td class="py-2 pr-4 text-slate-700">{{ etiquetaMes(mes.mes) }}</td>
+            <td class="py-2 pr-4 text-right tabular-nums text-slate-900">{{ mes.registrados }}</td>
+            <td class="py-2 text-right tabular-nums text-slate-900">{{ mes.cerrados }}</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    }
+
+  </section>
+
+
+  <!-- DESEMPEÑO POR ANALISTA -->
+  <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+
+    <div class="border-b border-slate-200 px-5 py-4">
+      <h3 class="font-semibold text-slate-900">Desempeño por analista</h3>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm">
+        <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+          <tr>
+            <th class="px-5 py-3 font-semibold">Analista</th>
+            <th class="px-5 py-3 text-right font-semibold">Asignados</th>
+            <th class="px-5 py-3 text-right font-semibold">En curso</th>
+            <th class="px-5 py-3 text-right font-semibold">Finalizados</th>
+            <th class="px-5 py-3 text-right font-semibold">Rechazados</th>
+            <th class="px-5 py-3 text-right font-semibold">Prom. resolución</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          @for (analista of r.porAnalista; track analista.idAnalista) {
+          <tr>
+            <td class="px-5 py-3 font-medium text-slate-900">{{ analista.nombreAnalista }}</td>
+            <td class="px-5 py-3 text-right tabular-nums">{{ analista.asignados }}</td>
+            <td class="px-5 py-3 text-right tabular-nums">{{ analista.enCurso }}</td>
+            <td class="px-5 py-3 text-right tabular-nums">{{ analista.finalizados }}</td>
+            <td class="px-5 py-3 text-right tabular-nums">{{ analista.rechazados }}</td>
+            <td class="px-5 py-3 text-right tabular-nums">{{ formatearHoras(analista.promedioHorasResolucion) }}</td>
+          </tr>
+          } @empty {
+          <tr>
+            <td colspan="6" class="px-5 py-8 text-center text-slate-500">Sin casos asignados en el período.</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+  </section>
+
+
+  <!-- CASOS ESTANCADOS -->
+  <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+
+    <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+      <h3 class="flex items-center gap-2 font-semibold text-slate-900">
+        <lucide-icon [img]="icono.TriangleAlert" class="h-5 w-5 text-amber-500" />
+        Casos estancados
+      </h3>
+      <p class="text-xs text-slate-500">Abiertos sin movimiento en más de {{ filtro.diasEstancado || 7 }} días</p>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm">
+        <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+          <tr>
+            <th class="px-5 py-3 font-semibold">Caso</th>
+            <th class="px-5 py-3 font-semibold">Estado</th>
+            <th class="px-5 py-3 font-semibold">Analista</th>
+            <th class="px-5 py-3 font-semibold">Último movimiento</th>
+            <th class="px-5 py-3 text-right font-semibold">Días</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          @for (caso of r.estancados; track caso.id) {
+          <tr>
+            <td class="px-5 py-3">
+              <a [routerLink]="['/admin/casos', caso.id]" class="font-mono text-xs font-semibold text-blue-600 hover:underline">
+                {{ caso.numeroCaso }}
+              </a>
+              <p class="text-xs text-slate-500">{{ caso.tipoIncidente }}</p>
+            </td>
+            <td class="px-5 py-3">
+              <span [class]="'whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ' + estiloEstado[caso.estado]">
+                {{ caso.estadoDescripcion }}
+              </span>
+            </td>
+            <td class="px-5 py-3 text-slate-700">{{ caso.nombreAnalista || 'Sin asignar' }}</td>
+            <td class="px-5 py-3 text-slate-500">{{ caso.ultimaActualizacion | date: 'dd/MM/yyyy HH:mm' }}</td>
+            <td class="px-5 py-3 text-right font-semibold tabular-nums text-slate-900">{{ caso.diasSinMovimiento }}</td>
+          </tr>
+          } @empty {
+          <tr>
+            <td colspan="5" class="px-5 py-8 text-center text-slate-500">No hay casos estancados.</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+  </section>
+
+  } @else if (cargando) {
+
+  <section class="rounded-2xl border border-slate-200 bg-white p-12 text-center text-sm text-slate-500 shadow-sm">
+    Generando reporte...
+  </section>
+
+  }
+
+</div>

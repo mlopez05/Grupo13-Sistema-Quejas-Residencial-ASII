@@ -1,16 +1,14 @@
 import { Routes } from '@angular/router';
 
 import { PublicLayout } from './layouts/public-layout/public-layout';
-import { authGuard } from './core/guards/auth.guard';
+import { authGuard, claveTemporalGuard } from './core/guards/auth.guard';
 import { MainLayout } from './layout/main-layout/main-layout';
 import { roleGuard } from './core/guards/role-guard';
 import { AdminLayout } from './layout/admin-layout/admin-layout';
 
 export const routes: Routes = [
 
-  // =========================
-  // ÁREA PÚBLICA
-  // =========================
+  /* ÁREA PÚBLICA */
   {
     path: '',
     component: PublicLayout,
@@ -68,9 +66,17 @@ export const routes: Routes = [
   },
 
 
-  // =========================
-  // ÁREA PRIVADA RESIDENTE
-  // =========================
+  /* PRIMER INGRESO DEL PERSONAL */
+  {
+    path: 'cambiar-clave-inicial',
+    canActivate: [claveTemporalGuard],
+    loadComponent: () =>
+      import('./features/auth/cambiar-clave-inicial/cambiar-clave-inicial')
+        .then(m => m.CambiarClaveInicial),
+  },
+
+
+  /* ÁREA DEL RESIDENTE */
   {
     path: '',
     component: MainLayout,
@@ -82,13 +88,37 @@ export const routes: Routes = [
           import('./features/dashboard/dashboard')
             .then(m => m.Dashboard),
       },
+      {
+        path: 'perfil',
+        loadComponent: () =>
+          import('./features/perfil/perfil')
+            .then(m => m.Perfil),
+      },
+      {
+        path: 'casos',
+        data: { modo: 'residente' },
+        loadComponent: () =>
+          import('./features/casos/lista-casos/lista-casos')
+            .then(m => m.ListaCasos),
+      },
+      {
+        path: 'casos/nuevo',
+        loadComponent: () =>
+          import('./features/casos/nuevo-caso/nuevo-caso')
+            .then(m => m.NuevoCaso),
+      },
+      {
+        path: 'casos/:id',
+        data: { modo: 'residente' },
+        loadComponent: () =>
+          import('./features/casos/detalle-caso/detalle-caso')
+            .then(m => m.DetalleCaso),
+      },
     ],
   },
 
 
-  // =========================
-  // ÁREA ADMINISTRATIVA
-  // =========================
+  /* ÁREA ADMINISTRATIVA */
   {
     path: 'admin',
     component: AdminLayout,
@@ -104,6 +134,26 @@ export const routes: Routes = [
             .then(m => m.AdminDashboard),
       },
       {
+        path: 'perfil',
+        loadComponent: () =>
+          import('./features/perfil/perfil')
+            .then(m => m.Perfil),
+      },
+      {
+        path: 'casos',
+        data: { modo: 'personal' },
+        loadComponent: () =>
+          import('./features/casos/lista-casos/lista-casos')
+            .then(m => m.ListaCasos),
+      },
+      {
+        path: 'casos/:id',
+        data: { modo: 'personal' },
+        loadComponent: () =>
+          import('./features/casos/detalle-caso/detalle-caso')
+            .then(m => m.DetalleCaso),
+      },
+      {
         path: 'usuarios/nuevo',
         canActivate: [roleGuard],
         data: {
@@ -112,6 +162,16 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/admin/usuarios/nuevo-usuario/nuevo-usuario')
             .then(m => m.NuevoUsuario),
+      },
+      {
+        path: 'usuarios/editar/:id',
+        canActivate: [roleGuard],
+        data: {
+          roles: ['Administrador'],
+        },
+        loadComponent: () =>
+          import('./features/admin/usuarios/editar-usuario/editar-usuario')
+            .then(m => m.EditarUsuario),
       },
       {
         path: 'usuarios',
@@ -123,13 +183,41 @@ export const routes: Routes = [
           import('./features/admin/usuarios/usuarios/usuarios')
             .then(m => m.Usuarios),
       },
+      {
+        path: 'reportes',
+        canActivate: [roleGuard],
+        data: {
+          roles: ['Supervisor', 'Administrador'],
+        },
+        loadComponent: () =>
+          import('./features/admin/reportes/reportes')
+            .then(m => m.Reportes),
+      },
+      {
+        path: 'catalogo',
+        canActivate: [roleGuard],
+        data: {
+          roles: ['Administrador'],
+        },
+        loadComponent: () =>
+          import('./features/admin/catalogo/catalogo')
+            .then(m => m.Catalogo),
+      },
+      {
+        path: 'contenido',
+        canActivate: [roleGuard],
+        data: {
+          roles: ['Administrador'],
+        },
+        loadComponent: () =>
+          import('./features/admin/contenido/contenido')
+            .then(m => m.Contenido),
+      },
     ],
   },
 
 
-  // =========================
-  // RUTA NO ENCONTRADA
-  // =========================
+  /* RUTA NO ENCONTRADA */
   {
     path: '**',
     redirectTo: '',

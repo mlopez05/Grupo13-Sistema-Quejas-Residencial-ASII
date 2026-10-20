@@ -2,16 +2,23 @@ package com.portal.residencial.authservice.service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
+import java.util.Objects;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.portal.residencial.authservice.bitacora.BitacoraClient;
+import com.portal.residencial.authservice.dto.ActualizarPerfilRequest;
+import com.portal.residencial.authservice.dto.CambiarClaveRequest;
 import com.portal.residencial.authservice.dto.ActualizarUsuarioRequest;
+import com.portal.residencial.authservice.dto.PersonalResponse;
 import com.portal.residencial.authservice.dto.RegistroRequest;
 import com.portal.residencial.authservice.dto.RegistroResponse;
+import com.portal.residencial.authservice.dto.UsuarioResponse;
 import com.portal.residencial.authservice.exception.BusinessException;
 import com.portal.residencial.authservice.model.Rol;
 import com.portal.residencial.authservice.model.Usuario;
@@ -34,6 +41,8 @@ public class UsuarioService {
         private final BitacoraClient bitacoraClient;
         private final JwtService jwtService;
 
+        private static final int EDAD_MINIMA = 18;
+
         public RegistroResponse registroUsuarioResidente(RegistroRequest request) {
 
                 if (usuarioRepository.findByCorreo(request.getCorreo()).isPresent()) {
@@ -45,6 +54,8 @@ public class UsuarioService {
                         throw new BusinessException("El DPI " + request.getDpi() + " ya se encuentra registrado.",
                                         HttpStatus.CONFLICT);
                 }
+
+                validarFechaNacimiento(request.getFecha_nacimiento());
 
                 Rol rol = rolRepository.findById(Long.valueOf(4))
                                 .orElseThrow(() -> new RuntimeException("Rol no encontrado."));
@@ -89,17 +100,21 @@ public class UsuarioService {
                                         HttpStatus.CONFLICT);
                 }
 
+                validarFechaNacimiento(request.getFecha_nacimiento());
+
                 Rol rol = rolRepository.findById(Long.valueOf(request.getId_rol()))
                                 .orElseThrow(() -> new RuntimeException("Rol no encontrado."));
 
+                /* LA CONTRASEÑA DEL PERSONAL ES TEMPORAL */
                 Usuario usuario = Usuario.builder()
+                                .debeCambiarClave(true)
                                 .nombre(request.getNombre())
                                 .apellido(request.getApellido())
                                 .correo(request.getCorreo())
                                 .clave(passwordEncoder.encode(request.getClave()))
                                 .fecha_nacimiento(request.getFecha_nacimiento())
                                 .dpi(request.getDpi())
-                                .telefono("kfslf")
+                                .telefono(request.getTelefono())
                                 .rol(rol)
                                 .direccion(request.getDireccion())
                                 .fecha_registro(LocalDate.now())
@@ -128,6 +143,29 @@ public class UsuarioService {
                 notificacionClient.enviarRecuperacionPassword(correo, token);
         }
 
+        /* CAMBIO DE CONTRASEÑA DESDE EL PERFIL (PIDE LA ACTUAL) */
+        public void cambiarClave(CambiarClaveRequest request, String ip) {
+                Usuario usuario = obtenerUsuarioAutenticado();
+
+                if (!passwordEncoder.matches(request.claveActual(), usuario.getClave())) {
+                        throw new BusinessException("La contraseña actual no es correcta.", HttpStatus.BAD_REQUEST);
+                }
+
+                if (passwordEncoder.matches(request.claveNueva(), usuario.getClave())) {
+                        throw new BusinessException("La nueva contraseña debe ser distinta a la actual.",
+                                        HttpStatus.BAD_REQUEST);
+                }
+
+                usuario.setClave(passwordEncoder.encode(request.claveNueva()));
+                usuario.setDebeCambiarClave(false); /* YA NO ES TEMPORAL */
+                usuarioRepository.save(usuario);
+
+                bitacoraClient.registrarCambioUsuario(
+                                usuario.getId(), usuario.getNombre(), usuario.getApellido(),
+                                "clave", "********", "********", "CAMBIO_CLAVE", ip,
+                                usuario.getId(), usuario.getNombre(), usuario.getApellido());
+        }
+
         public void restablecerPassword(String token, String nuevaPassword) {
                 String correo;
                 try {
@@ -143,57 +181,192 @@ public class UsuarioService {
                                                 HttpStatus.NOT_FOUND));
 
                 usuario.setClave(passwordEncoder.encode(nuevaPassword));
+                /* AL RESTABLECERLA DEJA DE SER TEMPORAL */
+                usuario.setDebeCambiarClave(false);
                 usuarioRepository.save(usuario);
         }
 
+        /* LA FECHA DE NACIMIENTO NO PUEDE SER FUTURA Y DEBE SER MAYOR DE EDAD */
+        private void validarFechaNacimiento(LocalDate fechaNacimiento) {
+                if (fechaNacimiento == null) {
+                        return;
+                }
+
+                if (fechaNacimiento.isAfter(LocalDate.now())) {
+                        throw new BusinessException("La fecha de nacimiento no puede ser posterior a la fecha actual.",
+                                        HttpStatus.BAD_REQUEST);
+                }
+
+                if (fechaNacimiento.plusYears(EDAD_MINIMA).isAfter(LocalDate.now())) {
+                        throw new BusinessException("La persona debe tener al menos " + EDAD_MINIMA + " años.",
+                                        HttpStatus.BAD_REQUEST);
+                }
+        }
+
+        public List<UsuarioResponse> listarUsuarios() {
+                return usuarioRepository.findAll(Sort.by("id")).stream()
+                                .map(this::aUsuarioResponse)
+                                .toList();
+        }
+
+        public UsuarioResponse obtenerUsuario(Long id) {
+                Usuario usuario = usuarioRepository.findById(id)
+                                .orElseThrow(() -> new BusinessException("Usuario no encontrado.",
+                                                HttpStatus.NOT_FOUND));
+
+                return aUsuarioResponse(usuario);
+        }
+
+        /* LISTA DE ANALISTAS O SUPERVISORES ACTIVOS */
+        public List<PersonalResponse> listarPersonalActivo(String rol) {
+                if (!"Analista".equals(rol) && !"Supervisor".equals(rol)) {
+                        throw new BusinessException("Rol no permitido. Use 'Analista' o 'Supervisor'.",
+                                        HttpStatus.BAD_REQUEST);
+                }
+
+                return usuarioRepository.findByRol_NombreOrderByIdAsc(rol).stream()
+                                .filter(Usuario::isEnabled)
+                                .map(usuario -> new PersonalResponse(
+                                                usuario.getId(),
+                                                usuario.getNombre(),
+                                                usuario.getApellido(),
+                                                usuario.getCorreo()))
+                                .toList();
+        }
+
+        /* CONVIERTE EL USUARIO A RESPUESTA SIN LA CONTRASEÑA */
+        private UsuarioResponse aUsuarioResponse(Usuario usuario) {
+                String estado = usuario.getEstado() == null || usuario.getEstado().isBlank()
+                                ? "Activo"
+                                : usuario.getEstado();
+
+                return new UsuarioResponse(
+                                usuario.getId(),
+                                usuario.getNombre(),
+                                usuario.getApellido(),
+                                usuario.getCorreo(),
+                                usuario.getFecha_nacimiento(),
+                                usuario.getDpi(),
+                                usuario.getTelefono(),
+                                usuario.getDireccion(),
+                                usuario.getRol() != null ? usuario.getRol().getNombre() : null,
+                                estado);
+        }
+
+        /* EL ADMINISTRADOR ACTUALIZA CUALQUIER USUARIO */
         public void actualizarUsuario(Long id, ActualizarUsuarioRequest request, String ip) {
                 Usuario usuarioExistente = usuarioRepository.findById(id)
                                 .orElseThrow(() -> new BusinessException("Usuario no encontrado.",
                                                 HttpStatus.NOT_FOUND));
 
-                String correoModificador = obtenerCorreoUsuarioAutenticado();
+                Usuario usuarioModificador = obtenerUsuarioAutenticado();
 
-                Usuario usuarioModificador = usuarioRepository.findByCorreo(correoModificador)
-                                .orElseThrow(() -> new BusinessException("Usuario modificador no encontrado.",
-                                                HttpStatus.NOT_FOUND));
-
-                registrarSiCambio(usuarioExistente.getId(), usuarioExistente.getNombre(), usuarioExistente.getApellido(),
-                                   "nombre", usuarioExistente.getNombre(), request.nombreUsuario(), ip, usuarioModificador.getId(),
-                                        usuarioModificador.getNombre(), usuarioModificador.getApellido());
-
-                registrarSiCambio(usuarioExistente.getId(), usuarioExistente.getNombre(), usuarioExistente.getApellido(),
-                                   "apellido", usuarioExistente.getApellido(), request.apellidoUsuario(), ip, usuarioModificador.getId(),
-                                        usuarioModificador.getNombre(), usuarioModificador.getApellido());
-
-                if (request.fechaNacimiento() != null){
-                registrarSiCambio(usuarioExistente.getId(), usuarioExistente.getNombre(), usuarioExistente.getApellido(),
-                                   "fecha_nacimiento", usuarioExistente.getFecha_nacimiento().toString(), request.fechaNacimiento().toString(), ip, usuarioModificador.getId(),
-                                        usuarioModificador.getNombre(), usuarioModificador.getApellido());
+                if ("Inactivo".equals(request.estado())
+                                && usuarioExistente.getId().equals(usuarioModificador.getId())) {
+                        throw new BusinessException("No puede inactivar su propia cuenta.",
+                                        HttpStatus.BAD_REQUEST);
                 }
 
-                registrarSiCambio(usuarioExistente.getId(), usuarioExistente.getNombre(), usuarioExistente.getApellido(),
-                                   "dpi", usuarioExistente.getDpi(), request.dpi(), ip, usuarioModificador.getId(),
-                                        usuarioModificador.getNombre(), usuarioModificador.getApellido());
+                aplicarActualizacion(usuarioExistente, usuarioModificador, request, ip);
+        }
 
-                registrarSiCambio(usuarioExistente.getId(), usuarioExistente.getNombre(), usuarioExistente.getApellido(),
-                                   "direccion", usuarioExistente.getDireccion(), request.direccion(), ip, usuarioModificador.getId(),
-                                        usuarioModificador.getNombre(), usuarioModificador.getApellido());
+        /* DATOS DEL USUARIO QUE INICIÓ SESIÓN */
+        public UsuarioResponse obtenerPerfil() {
+                return aUsuarioResponse(obtenerUsuarioAutenticado());
+        }
 
-                registrarSiCambio(usuarioExistente.getId(), usuarioExistente.getNombre(), usuarioExistente.getApellido(),
-                                   "telefono", usuarioExistente.getTelefono(), request.telefono(), ip, usuarioModificador.getId(),
-                                        usuarioModificador.getNombre(), usuarioModificador.getApellido());
+        /* EL USUARIO ACTUALIZA SU PROPIO PERFIL */
+        public void actualizarPerfil(ActualizarPerfilRequest request, String ip) {
+                Usuario usuario = obtenerUsuarioAutenticado();
 
-                registrarSiCambio(usuarioExistente.getId(), usuarioExistente.getNombre(), usuarioExistente.getApellido(),
-                                   "estado", usuarioExistente.getEstado(), request.estado(), ip, usuarioModificador.getId(),
-                                        usuarioModificador.getNombre(), usuarioModificador.getApellido());
+                ActualizarUsuarioRequest cambios = new ActualizarUsuarioRequest(
+                                request.nombreUsuario(),
+                                request.apellidoUsuario(),
+                                request.fechaNacimiento(),
+                                null,
+                                request.direccion(),
+                                request.telefono(),
+                                null);
 
-                usuarioExistente.setNombre(request.nombreUsuario());
-                usuarioExistente.setApellido(request.apellidoUsuario());
-                usuarioExistente.setFecha_nacimiento(request.fechaNacimiento());
-                usuarioExistente.setDpi(request.dpi());
-                usuarioExistente.setDireccion(request.direccion());
-                usuarioExistente.setTelefono(request.telefono());
-                usuarioExistente.setEstado(request.estado());
+                aplicarActualizacion(usuario, usuario, cambios, ip);
+        }
+
+        /* SOLO SE CAMBIAN Y REGISTRAN LOS CAMPOS QUE SE ENVÍAN */
+        private void aplicarActualizacion(Usuario usuarioExistente, Usuario usuarioModificador,
+                        ActualizarUsuarioRequest request, String ip) {
+
+                if (request.nombreUsuario() == null && request.apellidoUsuario() == null
+                                && request.fechaNacimiento() == null && request.dpi() == null
+                                && request.direccion() == null && request.telefono() == null
+                                && request.estado() == null) {
+                        throw new BusinessException("Debe enviar al menos un campo a modificar.",
+                                        HttpStatus.BAD_REQUEST);
+                }
+
+                if (request.dpi() != null && !request.dpi().equals(usuarioExistente.getDpi())
+                                && usuarioRepository.findByDpi(request.dpi()).isPresent()) {
+                        throw new BusinessException("El DPI " + request.dpi() + " ya se encuentra registrado.",
+                                        HttpStatus.CONFLICT);
+                }
+
+                validarFechaNacimiento(request.fechaNacimiento());
+
+                Long idModificado = usuarioExistente.getId();
+                String nombreModificado = usuarioExistente.getNombre();
+                String apellidoModificado = usuarioExistente.getApellido();
+                Long idModificador = usuarioModificador.getId();
+                String nombreModificador = usuarioModificador.getNombre();
+                String apellidoModificador = usuarioModificador.getApellido();
+
+                if (request.nombreUsuario() != null) {
+                        registrarSiCambio(idModificado, nombreModificado, apellidoModificado,
+                                        "nombre", usuarioExistente.getNombre(), request.nombreUsuario(), ip,
+                                        idModificador, nombreModificador, apellidoModificador);
+                        usuarioExistente.setNombre(request.nombreUsuario());
+                }
+
+                if (request.apellidoUsuario() != null) {
+                        registrarSiCambio(idModificado, nombreModificado, apellidoModificado,
+                                        "apellido", usuarioExistente.getApellido(), request.apellidoUsuario(), ip,
+                                        idModificador, nombreModificador, apellidoModificador);
+                        usuarioExistente.setApellido(request.apellidoUsuario());
+                }
+
+                if (request.fechaNacimiento() != null) {
+                        registrarSiCambio(idModificado, nombreModificado, apellidoModificado,
+                                        "fecha_nacimiento", Objects.toString(usuarioExistente.getFecha_nacimiento(), null),
+                                        request.fechaNacimiento().toString(), ip,
+                                        idModificador, nombreModificador, apellidoModificador);
+                        usuarioExistente.setFecha_nacimiento(request.fechaNacimiento());
+                }
+
+                if (request.dpi() != null) {
+                        registrarSiCambio(idModificado, nombreModificado, apellidoModificado,
+                                        "dpi", usuarioExistente.getDpi(), request.dpi(), ip,
+                                        idModificador, nombreModificador, apellidoModificador);
+                        usuarioExistente.setDpi(request.dpi());
+                }
+
+                if (request.direccion() != null) {
+                        registrarSiCambio(idModificado, nombreModificado, apellidoModificado,
+                                        "direccion", usuarioExistente.getDireccion(), request.direccion(), ip,
+                                        idModificador, nombreModificador, apellidoModificador);
+                        usuarioExistente.setDireccion(request.direccion());
+                }
+
+                if (request.telefono() != null) {
+                        registrarSiCambio(idModificado, nombreModificado, apellidoModificado,
+                                        "telefono", usuarioExistente.getTelefono(), request.telefono(), ip,
+                                        idModificador, nombreModificador, apellidoModificador);
+                        usuarioExistente.setTelefono(request.telefono());
+                }
+
+                if (request.estado() != null) {
+                        registrarSiCambio(idModificado, nombreModificado, apellidoModificado,
+                                        "estado", usuarioExistente.getEstado(), request.estado(), ip,
+                                        idModificador, nombreModificador, apellidoModificador);
+                        usuarioExistente.setEstado(request.estado());
+                }
 
                 usuarioRepository.save(usuarioExistente);
         }
@@ -223,12 +396,16 @@ public class UsuarioService {
                 }
         }
 
-        private String obtenerCorreoUsuarioAutenticado() {
-                Usuario usuario = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-                return usuario.getCorreo();
+        /* BUSCA AL USUARIO DE LA SESIÓN EN LA BASE */
+        private Usuario obtenerUsuarioAutenticado() {
+                Usuario principal = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+                return usuarioRepository.findByCorreo(principal.getCorreo())
+                                .orElseThrow(() -> new BusinessException("Usuario no encontrado.",
+                                                HttpStatus.NOT_FOUND));
         }
 
-        /* Método para crear el usuario admin */
+        /* CREA EL USUARIO ADMINISTRADOR */
         /*
          * public void registroAdmin(){
          * 

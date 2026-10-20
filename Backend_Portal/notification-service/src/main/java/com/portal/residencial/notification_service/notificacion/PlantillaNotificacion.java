@@ -2,7 +2,9 @@ package com.portal.residencial.notification_service.notificacion;
 
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.HtmlUtils;
 
 @Component
 public class PlantillaNotificacion {
@@ -14,9 +16,12 @@ public class PlantillaNotificacion {
             case CASO_CREADO -> "Hemos recibido tu caso #" + datos.get("numeroCaso");
             case CASO_ACTUALIZADO -> "Actualización en tu caso #" + datos.get("numeroCaso");
             case CASO_ASIGNADO -> "Nuevo caso asignado: #" + datos.get("numeroCaso");
-            case CASO_AUTORIZADO_RECHAZADO -> "Caso #" + datos.get("numeroCaso") + " " + datos.get("decision");
+            /* AUTORIZÓ O RECHAZÓ */
+            case CASO_AUTORIZADO_RECHAZADO -> "Decisión del Supervisor sobre el caso #" + datos.get("numeroCaso");
             case CASO_FINALIZADO -> "Tu caso #" + datos.get("numeroCaso") + " fue finalizado";
             case TRASLADO_AUTORIZACION -> "Caso #" + datos.get("numeroCaso") + " pendiente de autorización";
+            case AVANCE_REGISTRADO -> "Nuevo avance en tu caso #" + datos.get("numeroCaso");
+            case INFORMACION_AGREGADA -> "El residente agregó información al caso #" + datos.get("numeroCaso");
         };
     }
 
@@ -32,8 +37,61 @@ public class PlantillaNotificacion {
                 "El Supervisor " + datos.get("decision") + " el caso \"" + datos.get("titulo") + "\".";
             case CASO_FINALIZADO -> "Tu caso \"" + datos.get("titulo") + "\" se cerró el " + datos.get("fecha") + ".";
             case TRASLADO_AUTORIZACION -> "El caso \"" + datos.get("titulo") + "\" requiere tu autorización.";
+            case AVANCE_REGISTRADO -> "El analista registró un avance en tu caso \"" + datos.get("titulo") + "\".";
+            case INFORMACION_AGREGADA ->
+                "El residente agregó información al caso \"" + datos.get("titulo") + "\". Revisa el seguimiento.";
         };
     }
+
+    /* CUERPO DEL CORREO */
+    public String cuerpoCorreo(TipoNotificacion tipo, Map<String, String> datos) {
+        if (tipo == TipoNotificacion.BIENVENIDA_RESIDENTE || tipo == TipoNotificacion.RECUPERACION_PASSWORD) {
+            return cuerpo(tipo, datos);
+        }
+
+        return htmlCaso.formatted(
+                escapar(asunto(tipo, datos)),
+                escapar(cuerpo(tipo, datos)),
+                escapar(datos.get("numeroCaso")),
+                escapar(datos.get("titulo")),
+                escapar(datos.get("categoria")),
+                frontendUrl + "/login");
+    }
+
+    private static String escapar(String texto) {
+        return texto == null ? "" : HtmlUtils.htmlEscape(texto);
+    }
+
+    @Value("${frontend.url}")
+    private String frontendUrl;
+
+    private final String htmlCaso = """
+            <div style="font-family: Arial, sans-serif; max-width: 520px; margin: auto; color: #334155; line-height: 1.6;">
+              <h2 style="color: #0f172a; margin-bottom: 8px;">%s</h2>
+
+              <p style="margin-top: 0;">%s</p>
+
+              <div style="background-color: #f1f5f9; border-radius: 8px; padding: 14px 18px; margin: 20px 0;">
+                <p style="margin: 0; font-size: 13px; color: #64748b;">Caso</p>
+                <p style="margin: 2px 0 0; font-weight: bold; color: #0f172a;">#%s</p>
+                <p style="margin: 2px 0 0;">%s · %s</p>
+              </div>
+
+              <p>Ingresa al portal para ver el detalle y dar seguimiento al caso.</p>
+
+              <p style="text-align: center; margin: 24px 0;">
+                <a href="%s"
+                   style="background-color: #2563eb; color: #ffffff; padding: 12px 24px; text-decoration: none;
+                          border-radius: 6px; font-weight: bold; display: inline-block;">
+                  Ingresar al portal
+                </a>
+              </p>
+
+              <p style="font-size: 12px; color: #94a3b8;">
+                Este es un mensaje automático del Portal Residencial. No respondas a este correo.
+              </p>
+            </div>
+            """;
 
     private final String htmlRecuperarClave = """
             <html>

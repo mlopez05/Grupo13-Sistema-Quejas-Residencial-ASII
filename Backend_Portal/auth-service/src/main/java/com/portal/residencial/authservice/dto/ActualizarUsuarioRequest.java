@@ -2,16 +2,16 @@ package com.portal.residencial.authservice.dto;
 
 import java.time.LocalDate;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 
 public record ActualizarUsuarioRequest(
-    @NotBlank String nombreUsuario,
-    @NotBlank String apellidoUsuario,
+    @Pattern(regexp = ".*\\S.*", message = "no puede estar vacío") String nombreUsuario,
+    @Pattern(regexp = ".*\\S.*", message = "no puede estar vacío") String apellidoUsuario,
     LocalDate fechaNacimiento,
-    @NotBlank String dpi,
-    @NotBlank String direccion,
-    @NotBlank String telefono,
-    @NotBlank String estado
+    @Pattern(regexp = ".*\\S.*", message = "no puede estar vacío") String dpi,
+    @Pattern(regexp = ".*\\S.*", message = "no puede estar vacío") String direccion,
+    @Pattern(regexp = ".*\\S.*", message = "no puede estar vacío") String telefono,
+    @Pattern(regexp = "Activo|Inactivo", message = "debe ser 'Activo' o 'Inactivo'") String estado
 ) {
 
 }

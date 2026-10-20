@@ -10,6 +10,9 @@ import {
   AbstractControl,
   ValidationErrors,
 } from '@angular/forms';
+import { LucideAngularModule } from 'lucide-angular';
+import { ICONOS } from '../../../core/iconos';
+import { fechaHoy, fechaNoFuturaValidator, mayorDeEdadValidator } from '../../../core/validators/fechas';
 
 function passwordsMatchValidator(
   control: AbstractControl
@@ -25,52 +28,16 @@ function passwordsMatchValidator(
 }
 
 
-function mayorDeEdadValidator(
-  control: AbstractControl
-): ValidationErrors | null {
-  if (!control.value) return null;
-
-  const nacimiento = new Date(`${control.value}T00:00:00`);
-  const hoy = new Date();
-
-  let edad = hoy.getFullYear() - nacimiento.getFullYear();
-
-  if (
-    hoy.getMonth() < nacimiento.getMonth() ||
-    (hoy.getMonth() === nacimiento.getMonth() &&
-      hoy.getDate() < nacimiento.getDate())
-  ) {
-    edad--;
-  }
-
-  return edad >= 18 ? null : { menorDeEdad: true };
-}
-
-function fechaNoFuturaValidator(
-  control: AbstractControl
-): ValidationErrors | null {
-  if (!control.value) return null;
-
-  const hoy = new Date();
-  const fechaActual = [
-    hoy.getFullYear(),
-    String(hoy.getMonth() + 1).padStart(2, '0'),
-    String(hoy.getDate()).padStart(2, '0'),
-  ].join('-');
-
-  return control.value > fechaActual
-    ? { fechaFutura: true }
-    : null;
-}
-
-
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, LucideAngularModule],
   templateUrl: './register.html',
   styleUrl: './register.css',
 })
 export class Register {
+
+  readonly icono = ICONOS;
+
   private readonly formBuilder = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
@@ -83,17 +50,7 @@ export class Register {
   mostrarModal = false;
 
 
-  readonly fechaMaxima = this.obtenerFechaActual();
-
-  private obtenerFechaActual(): string {
-    const hoy = new Date();
-
-    return [
-      hoy.getFullYear(),
-      String(hoy.getMonth() + 1).padStart(2, '0'),
-      String(hoy.getDate()).padStart(2, '0'),
-    ].join('-');
-  }
+  readonly fechaMaxima = fechaHoy();
 
 
   readonly registerForm = this.formBuilder.group({
@@ -170,6 +127,7 @@ export class Register {
       clave: formValue.clave,
       fecha_nacimiento: formValue.fechaNacimiento,
       dpi: formValue.dpi,
+      telefono: formValue.telefono,
       direccion: formValue.direccion,
     };
 

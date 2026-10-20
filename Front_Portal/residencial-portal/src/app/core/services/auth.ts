@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { SessionService } from './session';
 import { Observable } from 'rxjs';
 import { Router } from '@angular/router';
-import { LoginRequest, LoginResponse, RecuperacionRequest, RegistroRequest, RegistroRequestPortal, RegistroResponse, ResetPasswordRequest } from '../models/auth.models';
+import { CambiarClaveRequest, LoginRequest, LoginResponse, RecuperacionRequest, RegistroRequest, RegistroRequestPortal, RegistroResponse, ResetPasswordRequest } from '../models/auth.models';
 import { finalize } from 'rxjs';
 
 @Injectable({
@@ -57,6 +57,11 @@ export class AuthService {
       `${this.apiUrl}/api/auth/reset-password`,
       request
     )
+  }
+
+  /* CAMBIA LA CONTRASEÑA DESDE EL PERFIL */
+  cambiarClave(request: CambiarClaveRequest): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/api/auth/change-password`, request);
   }
 
   cerrarSesion(): void {

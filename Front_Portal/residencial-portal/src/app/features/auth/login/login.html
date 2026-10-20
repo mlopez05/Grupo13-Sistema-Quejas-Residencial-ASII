@@ -1,14 +1,14 @@
 <div class="min-h-screen bg-slate-100 lg:grid lg:grid-cols-2">
 
-  <!-- Panel corporativo -->
+  <!-- PANEL CORPORATIVO -->
   <section class="relative hidden overflow-hidden bg-slate-950 lg:flex lg:flex-col lg:justify-between">
 
-    <!-- Decoración -->
+    <!-- DECORACIÓN -->
     <div class="absolute -left-32 -top-32 h-96 w-96 rounded-full bg-blue-600/20 blur-3xl"></div>
 
     <div class="absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-blue-500/10 blur-3xl"></div>
 
-    <!-- Branding -->
+    <!-- LOGO -->
     <div class="relative z-10 p-12">
       <div class="flex items-center gap-3">
         <div
@@ -32,7 +32,7 @@
       </div>
     </div>
 
-    <!-- Mensaje -->
+    <!-- MENSAJE -->
     <div class="relative z-10 px-12 pb-16">
       <span
         class="mb-5 inline-flex rounded-full border border-slate-700 bg-slate-900/70 px-3 py-1 text-xs font-medium text-slate-300">
@@ -49,7 +49,7 @@
       </p>
     </div>
 
-    <!-- Footer -->
+    <!-- PIE DE PÁGINA -->
     <div class="relative z-10 px-12 pb-8">
       <p class="text-xs text-slate-500">
         © 2026 Portal Residencial. Todos los derechos reservados.
@@ -57,11 +57,11 @@
     </div>
   </section>
 
-  <!-- Formulario -->
+  <!-- FORMULARIO -->
   <section class="flex min-h-screen items-center justify-center px-6 py-12 sm:px-10 lg:px-16">
     <div class="w-full max-w-md">
 
-      <!-- Mobile branding -->
+      <!-- LOGO EN CELULAR -->
       <div class="mb-10 flex items-center gap-3 lg:hidden">
         <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600 text-white">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8"
@@ -82,7 +82,7 @@
         </div>
       </div>
 
-      <!-- Header -->
+      <!-- ENCABEZADO -->
       <div>
         <p class="text-sm font-semibold text-blue-600">
           Bienvenido
@@ -97,10 +97,10 @@
         </p>
       </div>
 
-      <!-- Form -->
+      <!-- FORMULARIO -->
       <form class="mt-8 space-y-6" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
 
-        <!-- Email -->
+        <!-- CORREO -->
         <div>
           <label for="email" class="mb-2 block text-sm font-medium text-slate-700">
             Correo electrónico
@@ -121,7 +121,7 @@
           }
         </div>
 
-        <!-- Password -->
+        <!-- CONTRASEÑA -->
         <div>
           <div class="mb-2 flex items-center justify-between">
             <label for="password" class="block text-sm font-medium text-slate-700">
@@ -142,14 +142,14 @@
               class="absolute inset-y-0 right-0 flex items-center px-4 text-slate-400 transition hover:text-slate-600"
               [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'">
               @if (showPassword) {
-              <!-- Icono ocultar -->
+              <!-- ICONO OCULTAR -->
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8"
                 stroke="currentColor" class="h-5 w-5">
                 <path stroke-linecap="round" stroke-linejoin="round"
                   d="M3.98 8.223A10.477 10.477 0 0 0 2.25 12c1.5 3.5 5.2 6.75 9.75 6.75a10.5 10.5 0 0 0 5.52-1.56M6.23 6.23A10.5 10.5 0 0 1 12 5.25c4.55 0 8.25 3.25 9.75 6.75a10.48 10.48 0 0 1-2.14 3.39M3 3l18 18" />
               </svg>
               } @else {
-              <!-- Icono mostrar -->
+              <!-- ICONO MOSTRAR -->
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8"
                 stroke="currentColor" class="h-5 w-5">
                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -166,7 +166,7 @@
           }
         </div>
 
-        <!-- Remember -->
+        <!-- RECORDARME -->
         <div class="flex items-center" hidden="true">
           <label class="flex cursor-pointer items-center gap-3">
             <input type="checkbox" formControlName="rememberMe"
@@ -178,14 +178,14 @@
           </label>
         </div>
 
-        <!-- Button -->
+        <!-- BOTÓN -->
         <button type="submit" [disabled]="loginForm.invalid"
           class="w-full rounded-xl bg-blue-600 px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-600/20 focus:outline-none focus:ring-4 focus:ring-blue-500/20 active:scale-[0.99]  disabled:opacity-50 disabled:cursor-not-allowed">
           Iniciar sesión
         </button>
       </form>
 
-      <!-- Register -->
+      <!-- REGISTRO -->
       <div class="mt-8 text-center">
         <p class="text-sm text-slate-500">
           ¿Aún no tienes una cuenta?
@@ -196,7 +196,7 @@
         </p>
       </div>
 
-      <!-- Security -->
+      <!-- SEGURIDAD -->
       <div class="mt-10 flex items-center justify-center gap-2 text-xs text-slate-400">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"
           class="h-4 w-4">
@@ -221,9 +221,9 @@
       <div class="text-center">
 
         <div
-          class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-100 text-2xl font-bold text-red-600"
+          class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-100 text-red-600"
         >
-          !
+          <lucide-icon [img]="icono.TriangleAlert" class="h-7 w-7" />
         </div>
 
         <h3 class="text-lg font-bold text-slate-900">

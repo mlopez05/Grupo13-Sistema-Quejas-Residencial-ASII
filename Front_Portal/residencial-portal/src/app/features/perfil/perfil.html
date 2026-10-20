@@ -1,0 +1,527 @@
+<div class="mx-auto max-w-5xl space-y-8">
+
+  <!-- ENCABEZADO -->
+  <section>
+
+    <p class="text-sm font-medium text-blue-600">
+      Cuenta
+    </p>
+
+    <h2 class="mt-1 text-2xl font-bold tracking-tight text-slate-900">
+      Mi perfil
+    </h2>
+
+    <p class="mt-2 text-sm text-slate-500">
+      Consulta y actualiza tu información personal.
+    </p>
+
+  </section>
+
+
+  @if (cargando) {
+
+  <section class="rounded-2xl border border-slate-200 bg-white p-12 text-center text-sm text-slate-500 shadow-sm">
+    Cargando tu información...
+  </section>
+
+  } @else if (errorCarga) {
+
+  <section class="rounded-2xl border border-slate-200 bg-white p-12 text-center shadow-sm">
+
+    <p class="text-sm text-red-600">
+      {{ errorCarga }}
+    </p>
+
+    <button type="button" (click)="cargarPerfil()"
+      class="mt-4 rounded-lg px-4 py-2 text-xs font-semibold text-blue-600 transition hover:bg-blue-50">
+      Reintentar
+    </button>
+
+  </section>
+
+  } @else if (usuario) {
+
+  <!-- RESUMEN DE LA CUENTA -->
+  <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+      <div class="flex items-center gap-4">
+
+        <div
+          class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-blue-600 text-xl font-semibold text-white">
+          {{ (usuario.nombre || usuario.correo).charAt(0).toUpperCase() }}
+        </div>
+
+        <div class="min-w-0">
+          <p class="text-lg font-semibold text-slate-900">
+            {{ usuario.nombre }} {{ usuario.apellido }}
+          </p>
+
+          <p class="mt-1 truncate text-sm text-slate-500">
+            {{ usuario.correo }}
+          </p>
+        </div>
+
+      </div>
+
+      <div class="flex gap-2">
+
+        <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+          {{ usuario.rol }}
+        </span>
+
+        @if (usuario.estado === 'Activo') {
+        <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600">
+          Activo
+        </span>
+        } @else {
+        <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">
+          Inactivo
+        </span>
+        }
+
+      </div>
+
+    </div>
+
+    <dl class="mt-6 grid gap-4 border-t border-slate-100 pt-6 sm:grid-cols-2">
+
+      <div>
+        <dt class="text-xs font-medium uppercase tracking-wider text-slate-400">
+          Correo electrónico
+        </dt>
+        <dd class="mt-1 text-sm text-slate-900">
+          {{ usuario.correo }}
+        </dd>
+      </div>
+
+      <div>
+        <dt class="text-xs font-medium uppercase tracking-wider text-slate-400">
+          DPI
+        </dt>
+        <dd class="mt-1 text-sm text-slate-900">
+          {{ usuario.dpi || '—' }}
+        </dd>
+      </div>
+
+    </dl>
+
+    <p class="mt-4 text-xs text-slate-400">
+      Si necesitas cambiar tu correo o tu DPI, contacta a la administración.
+    </p>
+
+  </section>
+
+
+  <!-- FORMULARIO -->
+  <form [formGroup]="perfilForm" (ngSubmit)="onSubmit()" class="space-y-8">
+
+    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+
+      <div class="mb-6 border-b border-slate-100 pb-5">
+
+        <h3 class="font-semibold text-slate-900">
+          Información personal
+        </h3>
+
+        <p class="mt-1 text-sm text-slate-500">
+          Solo se guardarán los campos que cambies.
+        </p>
+
+      </div>
+
+
+      <div class="grid gap-6 md:grid-cols-2">
+
+        <!-- NOMBRE -->
+        <div>
+
+          <label for="nombre" class="mb-2 block text-sm font-medium text-slate-700">
+            Nombre <span class="text-red-500">*</span>
+          </label>
+
+          <input id="nombre" type="text" formControlName="nombre" placeholder="Ingrese su nombre"
+            class="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
+
+          @if (isInvalid('nombre')) {
+          <p class="mt-2 text-sm text-red-600">
+            El nombre es obligatorio.
+          </p>
+          }
+
+        </div>
+
+
+        <!-- APELLIDO -->
+        <div>
+
+          <label for="apellido" class="mb-2 block text-sm font-medium text-slate-700">
+            Apellido <span class="text-red-500">*</span>
+          </label>
+
+          <input id="apellido" type="text" formControlName="apellido" placeholder="Ingrese su apellido"
+            class="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
+
+          @if (isInvalid('apellido')) {
+          <p class="mt-2 text-sm text-red-600">
+            El apellido es obligatorio.
+          </p>
+          }
+
+        </div>
+
+
+        <!-- FECHA NACIMIENTO -->
+        <div>
+
+          <label for="fechaNacimiento" class="mb-2 block text-sm font-medium text-slate-700">
+            Fecha de nacimiento
+          </label>
+
+          <input id="fechaNacimiento" type="date" formControlName="fechaNacimiento" [max]="fechaMaxima"
+            class="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
+
+          @if (perfilForm.controls.fechaNacimiento.hasError('menorDeEdad') && (perfilForm.controls.fechaNacimiento.touched || submitted)) {
+          <p class="mt-2 text-sm text-red-600">
+              La persona debe tener al menos 18 años.
+          </p>
+          }
+
+          @if (perfilForm.controls.fechaNacimiento.hasError('fechaFutura') && (perfilForm.controls.fechaNacimiento.touched || submitted)) {
+          <p class="mt-2 text-sm text-red-600">
+              No puedes seleccionar una fecha posterior a la actual.
+          </p>
+          }
+
+        </div>
+
+
+        <!-- TELÉFONO -->
+        <div>
+
+          <label for="telefono" class="mb-2 block text-sm font-medium text-slate-700">
+            Teléfono
+          </label>
+
+          <input id="telefono" type="tel" inputmode="numeric" maxlength="8" formControlName="telefono"
+            placeholder="8 dígitos" (input)="onTelefonoInput($event)"
+            class="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
+
+          @if (isInvalid('telefono')) {
+
+          @if (perfilForm.controls.telefono.hasError('required')) {
+          <p class="mt-2 text-sm text-red-600">
+            El teléfono no puede quedar vacío.
+          </p>
+          }
+
+          @if (perfilForm.controls.telefono.hasError('pattern')) {
+          <p class="mt-2 text-sm text-red-600">
+            El teléfono debe contener exactamente 8 números.
+          </p>
+          }
+
+          }
+
+        </div>
+
+
+        <!-- DIRECCIÓN -->
+        <div class="md:col-span-2">
+
+          <label for="direccion" class="mb-2 block text-sm font-medium text-slate-700">
+            Dirección
+          </label>
+
+          <textarea id="direccion" rows="3" formControlName="direccion" placeholder="Ingrese su dirección"
+            class="block w-full resize-none rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"></textarea>
+
+          @if (isInvalid('direccion')) {
+          <p class="mt-2 text-sm text-red-600">
+            La dirección no puede quedar vacía.
+          </p>
+          }
+
+        </div>
+
+      </div>
+
+
+      @if (sinCambios) {
+      <p class="mt-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+        No has realizado ningún cambio.
+      </p>
+      }
+
+
+      <!-- BOTONES -->
+      <div class="mt-6 flex flex-col-reverse gap-3 border-t border-slate-100 pt-6 sm:flex-row sm:justify-end">
+
+        <button type="button" (click)="descartarCambios()" [disabled]="guardando"
+          class="rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50">
+          Descartar cambios
+        </button>
+
+        <button type="submit" [disabled]="perfilForm.invalid || guardando"
+          class="rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50">
+          @if (guardando) {
+          Guardando...
+          } @else {
+          Guardar cambios
+          }
+        </button>
+
+      </div>
+
+    </section>
+
+  </form>
+
+
+  <!-- SEGURIDAD -->
+  <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+      <div>
+        <h3 class="font-semibold text-slate-900">
+          Contraseña
+        </h3>
+
+        <p class="mt-1 text-sm text-slate-500">
+          Por seguridad, al cambiarla se cerrará tu sesión y deberás ingresar con la nueva contraseña.
+        </p>
+      </div>
+
+      <button type="button" (click)="abrirCambioClave()"
+        class="inline-flex shrink-0 items-center gap-2 rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+        <lucide-icon [img]="icono.KeyRound" class="h-4 w-4" />
+        Cambiar contraseña
+      </button>
+
+    </div>
+
+  </section>
+
+  }
+
+
+  <!-- CAMBIAR CONTRASEÑA -->
+  @if (cambiandoClave) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-4">
+    <form [formGroup]="claveForm" (ngSubmit)="guardarClave()"
+      class="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
+
+      <div class="flex items-center gap-3">
+        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+          <lucide-icon [img]="icono.KeyRound" class="h-5 w-5" />
+        </div>
+
+        <div>
+          <h3 class="text-lg font-bold text-slate-900">
+            Cambiar contraseña
+          </h3>
+          <p class="text-sm text-slate-500">
+            Al guardar, se cerrará tu sesión.
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-6 space-y-5">
+
+        <!-- CONTRASEÑA ACTUAL -->
+        <div>
+          <label for="claveActual" class="mb-2 block text-sm font-medium text-slate-700">
+            Contraseña actual <span class="text-red-500">*</span>
+          </label>
+
+          <div class="relative">
+            <input id="claveActual" [type]="mostrarClaveActual ? 'text' : 'password'" formControlName="claveActual"
+              autocomplete="current-password"
+              class="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 pr-12 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
+
+            <button type="button" (click)="mostrarClaveActual = !mostrarClaveActual"
+              class="absolute inset-y-0 right-0 flex items-center px-4 text-slate-400 hover:text-slate-600"
+              [attr.aria-label]="mostrarClaveActual ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+              <lucide-icon [img]="mostrarClaveActual ? icono.EyeOff : icono.Eye" class="h-4 w-4" />
+            </button>
+          </div>
+
+          @if (isClaveInvalida('claveActual')) {
+          <p class="mt-2 text-sm text-red-600">Ingresa tu contraseña actual.</p>
+          }
+        </div>
+
+        <!-- NUEVA CONTRASEÑA -->
+        <div>
+          <label for="claveNueva" class="mb-2 block text-sm font-medium text-slate-700">
+            Nueva contraseña <span class="text-red-500">*</span>
+          </label>
+
+          <div class="relative">
+            <input id="claveNueva" [type]="mostrarClaveNueva ? 'text' : 'password'" formControlName="claveNueva"
+              autocomplete="new-password" placeholder="Mínimo 8 caracteres"
+              class="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 pr-12 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
+
+            <button type="button" (click)="mostrarClaveNueva = !mostrarClaveNueva"
+              class="absolute inset-y-0 right-0 flex items-center px-4 text-slate-400 hover:text-slate-600"
+              [attr.aria-label]="mostrarClaveNueva ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+              <lucide-icon [img]="mostrarClaveNueva ? icono.EyeOff : icono.Eye" class="h-4 w-4" />
+            </button>
+          </div>
+
+          @if (isClaveInvalida('claveNueva')) {
+          @if (claveForm.controls.claveNueva.hasError('required')) {
+          <p class="mt-2 text-sm text-red-600">Ingresa la nueva contraseña.</p>
+          } @else if (claveForm.controls.claveNueva.hasError('minlength')) {
+          <p class="mt-2 text-sm text-red-600">Debe tener al menos 8 caracteres.</p>
+          } @else if (claveForm.controls.claveNueva.hasError('pattern')) {
+          <p class="mt-2 text-sm text-red-600">Debe incluir mayúsculas, minúsculas y números.</p>
+          }
+          } @else if (claveForm.hasError('igualALaActual') && claveForm.controls.claveNueva.touched) {
+          <p class="mt-2 text-sm text-red-600">La nueva contraseña debe ser distinta a la actual.</p>
+          } @else {
+          <p class="mt-2 text-xs text-slate-400">Mínimo 8 caracteres, con mayúsculas, minúsculas y números.</p>
+          }
+        </div>
+
+        <!-- CONFIRMACIÓN -->
+        <div>
+          <label for="confirmarClave" class="mb-2 block text-sm font-medium text-slate-700">
+            Confirmar nueva contraseña <span class="text-red-500">*</span>
+          </label>
+
+          <div class="relative">
+            <input id="confirmarClave" [type]="mostrarConfirmacion ? 'text' : 'password'" formControlName="confirmarClave"
+              autocomplete="new-password"
+              class="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 pr-12 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
+
+            <button type="button" (click)="mostrarConfirmacion = !mostrarConfirmacion"
+              class="absolute inset-y-0 right-0 flex items-center px-4 text-slate-400 hover:text-slate-600"
+              [attr.aria-label]="mostrarConfirmacion ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+              <lucide-icon [img]="mostrarConfirmacion ? icono.EyeOff : icono.Eye" class="h-4 w-4" />
+            </button>
+          </div>
+
+          @if (isClaveInvalida('confirmarClave')) {
+          <p class="mt-2 text-sm text-red-600">Confirma la nueva contraseña.</p>
+          } @else if (claveForm.hasError('noCoinciden') && claveForm.controls.confirmarClave.touched) {
+          <p class="mt-2 text-sm text-red-600">Las contraseñas no coinciden.</p>
+          }
+        </div>
+
+      </div>
+
+      @if (errorClave) {
+      <p class="mt-5 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <lucide-icon [img]="icono.CircleAlert" class="mt-0.5 h-4 w-4 shrink-0" />
+        {{ errorClave }}
+      </p>
+      }
+
+      <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+
+        <button type="button" (click)="cancelarCambioClave()" [disabled]="guardandoClave"
+          class="rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50">
+          Cancelar
+        </button>
+
+        <button type="submit" [disabled]="guardandoClave || claveForm.invalid"
+          class="rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50">
+          {{ guardandoClave ? 'Guardando...' : 'Cambiar contraseña' }}
+        </button>
+
+      </div>
+
+    </form>
+  </div>
+  }
+
+  <!-- CONTRASEÑA CAMBIADA -->
+  @if (claveCambiada) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-4">
+    <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+      <div class="text-center">
+
+        <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-100 text-green-600">
+          <lucide-icon [img]="icono.ShieldCheck" class="h-7 w-7" />
+        </div>
+
+        <h3 class="text-lg font-bold text-slate-900">
+          Contraseña actualizada
+        </h3>
+
+        <p class="mt-2 text-sm text-slate-500">
+          Por seguridad, tu sesión se cerrará para que ingreses con tu nueva contraseña.
+        </p>
+
+        <p class="mt-3 text-sm font-semibold text-slate-700">
+          Cerrando sesión en {{ segundosParaCerrar }} segundo(s)...
+        </p>
+
+        <button type="button" (click)="cerrarSesionAhora()"
+          class="mt-6 w-full rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700">
+          Ir a iniciar sesión
+        </button>
+
+      </div>
+    </div>
+  </div>
+  }
+
+  @if (actualizacionExitosa) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-4">
+    <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+      <div class="text-center">
+
+        <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-100 text-green-600">
+          <lucide-icon [img]="icono.CircleCheck" class="h-7 w-7" />
+        </div>
+
+        <h3 class="text-lg font-bold text-slate-900">
+          Perfil actualizado
+        </h3>
+
+        <p class="mt-2 text-sm text-slate-500">
+          Tus cambios se guardaron correctamente.
+        </p>
+
+        <button type="button" (click)="cerrarModalExito()"
+          class="mt-6 w-full rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700">
+          Aceptar
+        </button>
+
+      </div>
+    </div>
+  </div>
+  }
+
+  @if (mensajeError) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-4">
+    <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+      <div class="text-center">
+
+        <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-100 text-red-600">
+          <lucide-icon [img]="icono.TriangleAlert" class="h-7 w-7" />
+        </div>
+
+        <h3 class="text-lg font-bold text-slate-900">
+          Ocurrió un problema
+        </h3>
+
+        <p class="mt-2 text-sm text-slate-500">
+          {{ mensajeError }}
+        </p>
+
+        <button type="button" (click)="cerrarModalError()"
+          class="mt-6 w-full rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">
+          Cerrar
+        </button>
+
+      </div>
+    </div>
+  </div>
+  }
+
+</div>

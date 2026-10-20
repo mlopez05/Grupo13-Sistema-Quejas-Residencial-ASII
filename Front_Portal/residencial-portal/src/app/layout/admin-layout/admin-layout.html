@@ -1,13 +1,13 @@
 <div class="min-h-screen bg-slate-100">
 
-  <!-- Sidebar administrativo -->
+  <!-- MENÚ LATERAL -->
   <aside class="fixed inset-y-0 left-0 z-40 flex w-72 flex-col bg-slate-950 text-white">
 
-    <!-- Branding -->
+    <!-- LOGO -->
     <div class="flex h-20 items-center gap-3 border-b border-slate-800 px-6">
 
       <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600">
-        🏢
+        <lucide-icon [img]="icono.Building2" class="h-5 w-5 text-white" />
       </div>
 
       <div>
@@ -22,7 +22,7 @@
 
     </div>
 
-    <!-- Navegación -->
+    <!-- NAVEGACIÓN -->
     <nav class="flex-1 space-y-2 px-4 py-6">
 
       <p class="mb-3 px-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
@@ -33,7 +33,7 @@
         routerLink="/admin/dashboard"
         routerLinkActive="bg-blue-600 text-white"
         class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white">
-        📊
+        <lucide-icon [img]="icono.LayoutDashboard" class="h-5 w-5" />
         Dashboard
       </a>
 
@@ -41,9 +41,19 @@
         routerLink="/admin/casos"
         routerLinkActive="bg-blue-600 text-white"
         class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white">
-        📋
+        <lucide-icon [img]="icono.ClipboardList" class="h-5 w-5" />
         Casos
       </a>
+
+      @if (session?.rol === 'Supervisor' || session?.rol === 'Administrador') {
+        <a
+          routerLink="/admin/reportes"
+          routerLinkActive="bg-blue-600 text-white"
+          class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white">
+          <lucide-icon [img]="icono.ChartColumn" class="h-5 w-5" />
+          Reportes
+        </a>
+      }
 
       @if (session?.rol === 'Administrador') {
 
@@ -55,15 +65,43 @@
           routerLink="/admin/usuarios"
           routerLinkActive="bg-blue-600 text-white"
           class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white">
-          👥
+          <lucide-icon [img]="icono.Users" class="h-5 w-5" />
           Usuarios
+        </a>
+
+        <a
+          routerLink="/admin/catalogo"
+          routerLinkActive="bg-blue-600 text-white"
+          class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white">
+          <lucide-icon [img]="icono.Tags" class="h-5 w-5" />
+          Categorías e incidentes
+        </a>
+
+        <a
+          routerLink="/admin/contenido"
+          routerLinkActive="bg-blue-600 text-white"
+          class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white">
+          <lucide-icon [img]="icono.Newspaper" class="h-5 w-5" />
+          Contenido del portal
         </a>
 
       }
 
+      <p class="mb-3 mt-8 px-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+        Cuenta
+      </p>
+
+      <a
+        routerLink="/admin/perfil"
+        routerLinkActive="bg-blue-600 text-white"
+        class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white">
+        <lucide-icon [img]="icono.User" class="h-5 w-5" />
+        Mi perfil
+      </a>
+
     </nav>
 
-    <!-- Usuario -->
+    <!-- USUARIO -->
     <div class="border-t border-slate-800 p-4">
 
       <div class="mb-3 rounded-xl bg-slate-900 p-3">
@@ -82,7 +120,7 @@
         type="button"
         (click)="cerrarSesion()"
         class="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-400 transition hover:bg-red-500/10 hover:text-red-400">
-        🚪
+        <lucide-icon [img]="icono.LogOut" class="h-5 w-5" />
         Cerrar sesión
       </button>
 
@@ -91,10 +129,10 @@
   </aside>
 
 
-  <!-- Contenido -->
+  <!-- CONTENIDO -->
   <main class="min-h-screen pl-72">
 
-    <header class="flex h-20 items-center border-b border-slate-200 bg-white px-8">
+    <header class="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-slate-200 bg-white px-8">
 
       <div>
         <p class="text-sm text-slate-500">
@@ -104,6 +142,32 @@
         <h1 class="text-xl font-bold text-slate-900">
           Gestión del residencial
         </h1>
+      </div>
+
+      <!-- ACCIONES -->
+      <div class="flex items-center gap-5">
+
+        <app-campana-notificaciones />
+
+        <!-- USUARIO -->
+        <div class="flex items-center gap-3 border-l border-slate-200 pl-5">
+
+          <div class="text-right">
+            <p class="max-w-48 truncate text-sm font-semibold text-slate-900">
+              {{ session?.usuario }}
+            </p>
+
+            <p class="text-xs text-slate-500">
+              {{ session?.rol }}
+            </p>
+          </div>
+
+          <div class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 font-semibold text-white">
+            {{ session?.usuario?.charAt(0)?.toUpperCase() }}
+          </div>
+
+        </div>
+
       </div>
 
     </header>

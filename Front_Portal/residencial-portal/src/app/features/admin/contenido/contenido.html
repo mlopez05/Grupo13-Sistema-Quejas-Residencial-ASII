@@ -1,0 +1,436 @@
+<div class="space-y-6">
+
+  <!-- ENCABEZADO -->
+  <section>
+    <p class="text-sm font-medium text-blue-600">Administración</p>
+
+    <h2 class="mt-1 text-2xl font-bold tracking-tight text-slate-900">Contenido del portal</h2>
+
+    <p class="mt-2 text-sm text-slate-500">
+      Lo que se edita aquí es lo que ven los visitantes en la página pública del residencial.
+    </p>
+  </section>
+
+  <nav class="flex gap-1 border-b border-slate-200">
+    @for (opcion of [
+      { valor: 'datos', etiqueta: 'Datos del residencial', icono: icono.Landmark },
+      { valor: 'avisos', etiqueta: 'Avisos', icono: icono.Megaphone },
+      { valor: 'servicios', etiqueta: 'Servicios', icono: icono.Wrench }
+    ]; track opcion.valor) {
+    <button type="button" (click)="pestana = $any(opcion.valor)"
+      [class]="'-mb-px flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-semibold transition ' +
+        (pestana === opcion.valor ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800')">
+      <lucide-icon [img]="opcion.icono" class="h-4 w-4" />
+      {{ opcion.etiqueta }}
+    </button>
+    }
+  </nav>
+
+  @if (errorLista) {
+  <p class="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+    <lucide-icon [img]="icono.CircleAlert" class="mt-0.5 h-4 w-4 shrink-0" />
+    {{ errorLista }}
+  </p>
+  }
+
+
+  <!-- DATOS DEL RESIDENCIAL -->
+  @if (pestana === 'datos') {
+
+  @if (configuracion; as c) {
+  <form (ngSubmit)="guardarConfiguracion()" class="space-y-6">
+
+    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <h3 class="font-semibold text-slate-900">Identidad y contacto</h3>
+      <p class="mt-1 text-sm text-slate-500">Aparecen en el encabezado y el pie de página del portal.</p>
+
+      <div class="mt-5 grid gap-5 md:grid-cols-2">
+        <div>
+          <label for="nombreResidencial" class="mb-1.5 block text-sm font-medium text-slate-700">Nombre del residencial *</label>
+          <input id="nombreResidencial" name="nombreResidencial" maxlength="100" required [(ngModel)]="c.nombreResidencial"
+            class="block w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
+        </div>
+        <div>
+          <label for="lema" class="mb-1.5 block text-sm font-medium text-slate-700">Lema</label>
+          <input id="lema" name="lema" maxlength="150" [(ngModel)]="c.lema"
+            class="block w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
+        </div>
+        <div>
+          <label for="razonSocial" class="mb-1.5 block text-sm font-medium text-slate-700">Razón social</label>
+          <input id="razonSocial" name="razonSocial" maxlength="150" [(ngModel)]="c.razonSocial"
+            class="block w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
+        </div>
+        <div>
+          <label for="nit" class="mb-1.5 block text-sm font-medium text-slate-700">NIT</label>
+          <input id="nit" name="nit" maxlength="30" [(ngModel)]="c.nit"
+            class="block w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
+        </div>
+        <div class="md:col-span-2">
+          <label for="direccion" class="mb-1.5 block text-sm font-medium text-slate-700">Dirección</label>
+          <input id="direccion" name="direccion" maxlength="250" [(ngModel)]="c.direccion"
+            class="block w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
+        </div>
+        <div>
+          <label for="telefono" class="mb-1.5 block text-sm font-medium text-slate-700">Teléfono</label>
+          <input id="telefono" name="telefono" maxlength="30" [(ngModel)]="c.telefono"
+            class="block w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
+        </div>
+        <div>
+          <label for="correoContacto" class="mb-1.5 block text-sm font-medium text-slate-700">Correo de contacto</label>
+          <input id="correoContacto" name="correoContacto" type="email" maxlength="120" [(ngModel)]="c.correoContacto"
+            class="block w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
+        </div>
+        <div class="md:col-span-2">
+          <label for="horarioAtencion" class="mb-1.5 block text-sm font-medium text-slate-700">Horario de atención</label>
+          <input id="horarioAtencion" name="horarioAtencion" maxlength="150" [(ngModel)]="c.horarioAtencion"
+            placeholder="Lunes a viernes de 8:00 a 17:00"
+            class="block w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
+        </div>
+      </div>
+    </section>
+
+    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <h3 class="font-semibold text-slate-900">Textos de la página</h3>
+      <p class="mt-1 text-sm text-slate-500">Página de inicio y sección "Nosotros".</p>
+
+      <div class="mt-5 space-y-5">
+        <div>
+          <label for="tituloBienvenida" class="mb-1.5 block text-sm font-medium text-slate-700">Título de bienvenida *</label>
+          <input id="tituloBienvenida" name="tituloBienvenida" maxlength="150" required [(ngModel)]="c.tituloBienvenida"
+            class="block w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
+        </div>
+        <div>
+          <label for="mensajeBienvenida" class="mb-1.5 block text-sm font-medium text-slate-700">Mensaje de bienvenida</label>
+          <textarea id="mensajeBienvenida" name="mensajeBienvenida" rows="3" maxlength="500" [(ngModel)]="c.mensajeBienvenida"
+            class="block w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"></textarea>
+        </div>
+        <div>
+          <label for="descripcionComunidad" class="mb-1.5 block text-sm font-medium text-slate-700">Sobre la comunidad</label>
+          <textarea id="descripcionComunidad" name="descripcionComunidad" rows="4" maxlength="1500" [(ngModel)]="c.descripcionComunidad"
+            class="block w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"></textarea>
+        </div>
+        <div class="grid gap-5 md:grid-cols-2">
+          <div>
+            <label for="mision" class="mb-1.5 block text-sm font-medium text-slate-700">Misión</label>
+            <textarea id="mision" name="mision" rows="4" maxlength="1000" [(ngModel)]="c.mision"
+              class="block w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"></textarea>
+          </div>
+          <div>
+            <label for="vision" class="mb-1.5 block text-sm font-medium text-slate-700">Visión</label>
+            <textarea id="vision" name="vision" rows="4" maxlength="1000" [(ngModel)]="c.vision"
+              class="block w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"></textarea>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    @if (errorConfiguracion) {
+    <p class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{{ errorConfiguracion }}</p>
+    }
+    @if (mensajeConfiguracion) {
+    <p class="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+      <lucide-icon [img]="icono.CircleCheck" class="h-4 w-4" />
+      {{ mensajeConfiguracion }}
+    </p>
+    }
+
+    <div class="flex justify-end">
+      <button type="submit" [disabled]="guardandoConfiguracion"
+        class="rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 disabled:opacity-50">
+        {{ guardandoConfiguracion ? 'Guardando...' : 'Guardar cambios' }}
+      </button>
+    </div>
+
+  </form>
+  } @else if (errorConfiguracion) {
+  <p class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{{ errorConfiguracion }}</p>
+  } @else {
+  <section class="rounded-2xl border border-slate-200 bg-white p-12 text-center text-sm text-slate-500 shadow-sm">
+    Cargando...
+  </section>
+  }
+
+  }
+
+
+  <!-- AVISOS -->
+  @if (pestana === 'avisos') {
+
+  <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+
+    <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+      <p class="text-sm text-slate-500">
+        Se muestran en el portal los avisos publicados, desde su fecha de publicación hasta su vencimiento.
+      </p>
+      <button type="button" (click)="nuevoAviso()"
+        class="inline-flex shrink-0 items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700">
+        <lucide-icon [img]="icono.Plus" class="h-4 w-4" />
+        Nuevo aviso
+      </button>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm">
+        <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+          <tr>
+            <th class="px-5 py-3 font-semibold">Aviso</th>
+            <th class="px-5 py-3 font-semibold">Categoría</th>
+            <th class="px-5 py-3 font-semibold">Publicación</th>
+            <th class="px-5 py-3 font-semibold">Estado</th>
+            <th class="px-5 py-3 text-right font-semibold">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          @for (aviso of avisos; track aviso.id) {
+          <tr class="align-top">
+            <td class="px-5 py-3">
+              <p class="font-medium text-slate-900">{{ aviso.titulo }}</p>
+              <p class="mt-0.5 line-clamp-2 max-w-md text-xs text-slate-500">{{ aviso.contenido }}</p>
+            </td>
+            <td class="px-5 py-3">
+              <span [class]="'whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ' + estiloCategoria[aviso.categoria]">
+                {{ aviso.categoriaEtiqueta }}
+              </span>
+            </td>
+            <td class="whitespace-nowrap px-5 py-3 text-slate-600">
+              {{ aviso.fechaPublicacion | date: 'dd/MM/yyyy' }}
+              @if (aviso.fechaVencimiento) {
+              <p class="text-xs text-slate-400">Vence {{ aviso.fechaVencimiento | date: 'dd/MM/yyyy' }}</p>
+              }
+            </td>
+            <td class="px-5 py-3">
+              @if (aviso.vigente) {
+              <span class="whitespace-nowrap rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">Visible</span>
+              } @else if (!aviso.publicado) {
+              <span class="whitespace-nowrap rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">Borrador</span>
+              } @else {
+              <span class="whitespace-nowrap rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">Fuera de fecha</span>
+              }
+            </td>
+            <td class="px-5 py-3 text-right">
+              <div class="inline-flex gap-1">
+                <button type="button" (click)="editarAviso(aviso)" aria-label="Editar aviso"
+                  class="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900">
+                  <lucide-icon [img]="icono.Pencil" class="h-4 w-4" />
+                </button>
+                <button type="button" (click)="eliminarAviso(aviso)" aria-label="Eliminar aviso"
+                  class="rounded-lg p-2 text-slate-500 transition hover:bg-red-50 hover:text-red-600">
+                  <lucide-icon [img]="icono.Trash2" class="h-4 w-4" />
+                </button>
+              </div>
+            </td>
+          </tr>
+          } @empty {
+          <tr>
+            <td colspan="5" class="px-5 py-10 text-center text-slate-500">Aún no hay avisos.</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+  </section>
+
+  }
+
+
+  <!-- SERVICIOS -->
+  @if (pestana === 'servicios') {
+
+  <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+
+    <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+      <p class="text-sm text-slate-500">Los servicios activos se muestran en el portal según su orden.</p>
+      <button type="button" (click)="nuevoServicio()"
+        class="inline-flex shrink-0 items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700">
+        <lucide-icon [img]="icono.Plus" class="h-4 w-4" />
+        Nuevo servicio
+      </button>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm">
+        <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+          <tr>
+            <th class="px-5 py-3 font-semibold">Orden</th>
+            <th class="px-5 py-3 font-semibold">Servicio</th>
+            <th class="px-5 py-3 font-semibold">Horario</th>
+            <th class="px-5 py-3 font-semibold">Estado</th>
+            <th class="px-5 py-3 text-right font-semibold">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          @for (servicio of servicios; track servicio.id) {
+          <tr class="align-top">
+            <td class="px-5 py-3 tabular-nums text-slate-500">{{ servicio.orden }}</td>
+            <td class="px-5 py-3">
+              <p class="font-medium text-slate-900">{{ servicio.nombre }}</p>
+              <p class="mt-0.5 line-clamp-2 max-w-md text-xs text-slate-500">{{ servicio.descripcion }}</p>
+            </td>
+            <td class="px-5 py-3 text-slate-600">{{ servicio.horario || '—' }}</td>
+            <td class="px-5 py-3">
+              <span [class]="'whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ' +
+                (servicio.activo ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600')">
+                {{ servicio.activo ? 'Activo' : 'Inactivo' }}
+              </span>
+            </td>
+            <td class="px-5 py-3 text-right">
+              <div class="inline-flex gap-1">
+                <button type="button" (click)="editarServicio(servicio)" aria-label="Editar servicio"
+                  class="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900">
+                  <lucide-icon [img]="icono.Pencil" class="h-4 w-4" />
+                </button>
+                <button type="button" (click)="eliminarServicio(servicio)" aria-label="Eliminar servicio"
+                  class="rounded-lg p-2 text-slate-500 transition hover:bg-red-50 hover:text-red-600">
+                  <lucide-icon [img]="icono.Trash2" class="h-4 w-4" />
+                </button>
+              </div>
+            </td>
+          </tr>
+          } @empty {
+          <tr>
+            <td colspan="5" class="px-5 py-10 text-center text-slate-500">Aún no hay servicios.</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+  </section>
+
+  }
+
+</div>
+
+
+<!-- VENTANA DE AVISO -->
+@if (aviso) {
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4" (click)="cerrarModal()">
+
+  <form (ngSubmit)="guardarAviso()" (click)="$event.stopPropagation()"
+    class="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-xl">
+
+    <h3 class="text-lg font-semibold text-slate-900">{{ aviso.id === null ? 'Nuevo aviso' : 'Editar aviso' }}</h3>
+
+    <div class="mt-5 space-y-4">
+      <div>
+        <label for="aviso-titulo" class="mb-1.5 block text-sm font-medium text-slate-700">Título *</label>
+        <input id="aviso-titulo" name="titulo" maxlength="150" required [(ngModel)]="aviso.titulo"
+          class="block w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
+      </div>
+
+      <div>
+        <label for="aviso-contenido" class="mb-1.5 block text-sm font-medium text-slate-700">Contenido *</label>
+        <textarea id="aviso-contenido" name="contenido" rows="5" maxlength="2000" required [(ngModel)]="aviso.contenido"
+          class="block w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"></textarea>
+        <p class="mt-1 text-right text-xs text-slate-400">{{ aviso.contenido.length }}/2000</p>
+      </div>
+
+      <div>
+        <label for="aviso-categoria" class="mb-1.5 block text-sm font-medium text-slate-700">Categoría</label>
+        <select id="aviso-categoria" name="categoria" [(ngModel)]="aviso.categoria"
+          class="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10">
+          @for (categoria of categoriasAviso; track categoria.valor) {
+          <option [value]="categoria.valor">{{ categoria.etiqueta }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label for="aviso-publicacion" class="mb-1.5 block text-sm font-medium text-slate-700">Publicar desde *</label>
+          <input id="aviso-publicacion" name="fechaPublicacion" type="date" required [(ngModel)]="aviso.fechaPublicacion"
+            class="block w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
+        </div>
+        <div>
+          <label for="aviso-vencimiento" class="mb-1.5 block text-sm font-medium text-slate-700">Vence (opcional)</label>
+          <input id="aviso-vencimiento" name="fechaVencimiento" type="date" [min]="aviso.fechaPublicacion"
+            [(ngModel)]="aviso.fechaVencimiento"
+            class="block w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
+        </div>
+      </div>
+
+      <label class="flex items-center gap-3 text-sm text-slate-700">
+        <input name="publicado" type="checkbox" [(ngModel)]="aviso.publicado" class="h-4 w-4 rounded border-slate-300" />
+        Publicado (desmarcado queda como borrador)
+      </label>
+    </div>
+
+    @if (errorModal) {
+    <p class="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{{ errorModal }}</p>
+    }
+
+    <div class="mt-6 flex justify-end gap-3">
+      <button type="button" (click)="cerrarModal()" [disabled]="guardando"
+        class="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-100">Cancelar</button>
+      <button type="submit" [disabled]="guardando"
+        class="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50">
+        {{ guardando ? 'Guardando...' : 'Guardar' }}
+      </button>
+    </div>
+
+  </form>
+
+</div>
+}
+
+
+<!-- VENTANA DE SERVICIO -->
+@if (servicio) {
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4" (click)="cerrarModal()">
+
+  <form (ngSubmit)="guardarServicio()" (click)="$event.stopPropagation()"
+    class="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-xl">
+
+    <h3 class="text-lg font-semibold text-slate-900">{{ servicio.id === null ? 'Nuevo servicio' : 'Editar servicio' }}</h3>
+
+    <div class="mt-5 space-y-4">
+      <div>
+        <label for="servicio-nombre" class="mb-1.5 block text-sm font-medium text-slate-700">Nombre *</label>
+        <input id="servicio-nombre" name="nombre" maxlength="100" required [(ngModel)]="servicio.nombre"
+          class="block w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
+      </div>
+
+      <div>
+        <label for="servicio-descripcion" class="mb-1.5 block text-sm font-medium text-slate-700">Descripción *</label>
+        <textarea id="servicio-descripcion" name="descripcion" rows="4" maxlength="1000" required [(ngModel)]="servicio.descripcion"
+          class="block w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"></textarea>
+      </div>
+
+      <div class="grid gap-4 sm:grid-cols-3">
+        <div class="sm:col-span-2">
+          <label for="servicio-horario" class="mb-1.5 block text-sm font-medium text-slate-700">Horario</label>
+          <input id="servicio-horario" name="horario" maxlength="150" [(ngModel)]="servicio.horario"
+            placeholder="Todos los días, 6:00 a 22:00"
+            class="block w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
+        </div>
+        <div>
+          <label for="servicio-orden" class="mb-1.5 block text-sm font-medium text-slate-700">Orden</label>
+          <input id="servicio-orden" name="orden" type="number" min="0" max="999" [(ngModel)]="servicio.orden"
+            class="block w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
+        </div>
+      </div>
+
+      <label class="flex items-center gap-3 text-sm text-slate-700">
+        <input name="activo" type="checkbox" [(ngModel)]="servicio.activo" class="h-4 w-4 rounded border-slate-300" />
+        Activo (visible en el portal)
+      </label>
+    </div>
+
+    @if (errorModal) {
+    <p class="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{{ errorModal }}</p>
+    }
+
+    <div class="mt-6 flex justify-end gap-3">
+      <button type="button" (click)="cerrarModal()" [disabled]="guardando"
+        class="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-100">Cancelar</button>
+      <button type="submit" [disabled]="guardando"
+        class="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50">
+        {{ guardando ? 'Guardando...' : 'Guardar' }}
+      </button>
+    </div>
+
+  </form>
+
+</div>
+}

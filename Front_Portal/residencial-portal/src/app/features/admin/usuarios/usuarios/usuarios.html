@@ -1,6 +1,6 @@
 <div class="space-y-6">
 
-  <!-- Encabezado -->
+  <!-- ENCABEZADO -->
   <section class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
 
     <div>
@@ -13,7 +13,7 @@
       </h2>
 
       <p class="mt-2 text-sm text-slate-500">
-        Administra los usuarios administrativos del sistema.
+        Administra los usuarios del sistema.
       </p>
     </div>
 
@@ -29,12 +29,12 @@
   </section>
 
 
-  <!-- Filtros -->
+  <!-- FILTROS -->
   <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
 
     <div class="grid gap-4 md:grid-cols-3">
 
-      <!-- Búsqueda -->
+      <!-- BÚSQUEDA -->
       <div>
 
         <label
@@ -53,7 +53,7 @@
       </div>
 
 
-      <!-- Rol -->
+      <!-- ROL -->
       <div>
 
         <label
@@ -82,7 +82,7 @@
       </div>
 
 
-      <!-- Estado -->
+      <!-- ESTADO -->
       <div>
 
         <label
@@ -117,7 +117,7 @@
   </section>
 
 
-  <!-- Tabla -->
+  <!-- TABLA -->
   <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
 
     <div class="border-b border-slate-200 px-6 py-5">
@@ -164,23 +164,60 @@
 
         <tbody class="divide-y divide-slate-100">
 
+          @if (cargando) {
+
+            <tr>
+              <td
+                colspan="4"
+                class="px-6 py-12 text-center text-sm text-slate-500">
+                Cargando usuarios...
+              </td>
+            </tr>
+
+          } @else if (errorCarga) {
+
+            <tr>
+              <td
+                colspan="4"
+                class="px-6 py-12 text-center text-sm">
+
+                <p class="text-red-600">
+                  {{ errorCarga }}
+                </p>
+
+                <button
+                  type="button"
+                  (click)="cargarUsuarios()"
+                  class="mt-4 rounded-lg px-4 py-2 text-xs font-semibold text-blue-600 transition hover:bg-blue-50">
+                  Reintentar
+                </button>
+
+              </td>
+            </tr>
+
+          } @else {
+
           @for (usuario of usuariosFiltrados; track usuario.id) {
 
             <tr class="transition hover:bg-slate-50">
 
-              <!-- Usuario -->
+              <!-- USUARIO -->
               <td class="px-6 py-5">
 
                 <div class="flex items-center gap-3">
 
                   <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50 font-semibold text-blue-600">
-                    {{ usuario.nombre.charAt(0) }}
+                    {{ inicial(usuario) }}
                   </div>
 
                   <div>
 
                     <p class="font-medium text-slate-900">
-                      {{ usuario.nombre }}
+                      {{ nombreCompleto(usuario) }}
+
+                      @if (esUsuarioActual(usuario)) {
+                        <span class="ml-1 text-xs font-normal text-slate-400">(tú)</span>
+                      }
                     </p>
 
                     <p class="mt-1 text-sm text-slate-500">
@@ -194,7 +231,7 @@
               </td>
 
 
-              <!-- Rol -->
+              <!-- ROL -->
               <td class="px-6 py-5">
 
                 <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
@@ -204,7 +241,7 @@
               </td>
 
 
-              <!-- Estado -->
+              <!-- ESTADO -->
               <td class="px-6 py-5">
 
                 @if (usuario.estado === 'Activo') {
@@ -224,21 +261,26 @@
               </td>
 
 
-              <!-- Acciones -->
+              <!-- ACCIONES -->
               <td class="px-6 py-5">
 
                 <div class="flex justify-end gap-2">
 
-                  <button
-                    type="button"
+                  <a
+                    [routerLink]="['/admin/usuarios/editar', usuario.id]"
                     class="rounded-lg px-3 py-2 text-xs font-semibold text-blue-600 transition hover:bg-blue-50">
                     Editar
-                  </button>
+                  </a>
 
                   <button
                     type="button"
-                    class="rounded-lg px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-100">
-                    {{ usuario.estado === 'Activo' ? 'Inactivar' : 'Activar' }}
+                    (click)="solicitarCambioEstado(usuario)"
+                    [disabled]="esUsuarioActual(usuario)"
+                    [title]="esUsuarioActual(usuario) ? 'No puedes cambiar el estado de tu propia cuenta' : ''"
+                    [class]="estaActivo(usuario)
+                      ? 'rounded-lg px-3 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent'
+                      : 'rounded-lg px-3 py-2 text-xs font-semibold text-emerald-600 transition hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent'">
+                    {{ estaActivo(usuario) ? 'Inactivar' : 'Activar' }}
                   </button>
 
                 </div>
@@ -265,6 +307,8 @@
 
           }
 
+          }
+
         </tbody>
 
       </table>
@@ -272,5 +316,119 @@
     </div>
 
   </section>
+
+
+  <!-- CONFIRMACIÓN DE CAMBIO DE ESTADO -->
+  @if (usuarioPorCambiarEstado; as usuario) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-4">
+    <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+      <div class="text-center">
+
+        @if (estaActivo(usuario)) {
+        <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-100 text-red-600">
+          <lucide-icon [img]="icono.TriangleAlert" class="h-7 w-7" />
+        </div>
+
+        <h3 class="text-lg font-bold text-slate-900">
+          ¿Inactivar usuario?
+        </h3>
+
+        <p class="mt-2 text-sm text-slate-500">
+          <span class="font-semibold text-slate-700">{{ nombreCompleto(usuario) }}</span>
+          ({{ usuario.correo }}) ya no podrá iniciar sesión en el portal.
+        </p>
+        } @else {
+        <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+          <lucide-icon [img]="icono.CircleCheck" class="h-7 w-7" />
+        </div>
+
+        <h3 class="text-lg font-bold text-slate-900">
+          ¿Activar usuario?
+        </h3>
+
+        <p class="mt-2 text-sm text-slate-500">
+          <span class="font-semibold text-slate-700">{{ nombreCompleto(usuario) }}</span>
+          ({{ usuario.correo }}) podrá volver a iniciar sesión en el portal.
+        </p>
+        }
+
+        <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row">
+
+          <button type="button" (click)="cancelarCambioEstado()" [disabled]="cambiandoEstado"
+            class="w-full rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50">
+            Cancelar
+          </button>
+
+          <button type="button" (click)="confirmarCambioEstado()" [disabled]="cambiandoEstado"
+            [class]="estaActivo(usuario)
+              ? 'w-full rounded-xl bg-red-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50'
+              : 'w-full rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50'">
+            @if (cambiandoEstado) {
+            Guardando...
+            } @else {
+            {{ estaActivo(usuario) ? 'Inactivar' : 'Activar' }}
+            }
+          </button>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+  }
+
+  @if (mensajeExito) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-4">
+    <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+      <div class="text-center">
+
+        <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-100 text-green-600">
+          <lucide-icon [img]="icono.CircleCheck" class="h-7 w-7" />
+        </div>
+
+        <h3 class="text-lg font-bold text-slate-900">
+          Estado actualizado
+        </h3>
+
+        <p class="mt-2 text-sm text-slate-500">
+          {{ mensajeExito }}
+        </p>
+
+        <button type="button" (click)="cerrarModalExito()"
+          class="mt-6 w-full rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700">
+          Aceptar
+        </button>
+
+      </div>
+    </div>
+  </div>
+  }
+
+  @if (mensajeError) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-4">
+    <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+      <div class="text-center">
+
+        <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-100 text-red-600">
+          <lucide-icon [img]="icono.TriangleAlert" class="h-7 w-7" />
+        </div>
+
+        <h3 class="text-lg font-bold text-slate-900">
+          No se pudo actualizar
+        </h3>
+
+        <p class="mt-2 text-sm text-slate-500">
+          {{ mensajeError }}
+        </p>
+
+        <button type="button" (click)="cerrarModalError()"
+          class="mt-6 w-full rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">
+          Cerrar
+        </button>
+
+      </div>
+    </div>
+  </div>
+  }
 
 </div>

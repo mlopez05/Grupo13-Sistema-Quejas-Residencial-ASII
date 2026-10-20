@@ -1,1 +1,102 @@
-<p>nosotros works!</p>
+<!-- ENCABEZADO -->
+<section class="bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 text-white">
+  <div class="mx-auto max-w-7xl px-6 py-16">
+    <p class="text-sm font-semibold uppercase tracking-wider text-blue-300">Nosotros</p>
+    <h1 class="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+      {{ configuracion()?.nombreResidencial ?? 'Nuestra comunidad' }}
+    </h1>
+    @if (configuracion()?.lema; as lema) {
+    <p class="mt-3 text-lg text-slate-300">{{ lema }}</p>
+    }
+  </div>
+</section>
+
+
+@if (configuracion(); as c) {
+
+<section class="bg-white py-16">
+  <div class="mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-3">
+
+    <!-- COMUNIDAD -->
+    <div class="lg:col-span-2">
+      <h2 class="text-2xl font-bold tracking-tight text-slate-900">Nuestra comunidad</h2>
+      <p class="mt-4 whitespace-pre-line leading-7 text-slate-600">
+        {{ c.descripcionComunidad || 'Pronto compartiremos más información sobre nuestra comunidad.' }}
+      </p>
+
+      <div class="mt-10 grid gap-6 md:grid-cols-2">
+        @if (c.mision) {
+        <article class="rounded-2xl border border-slate-200 bg-slate-50 p-6">
+          <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+            <lucide-icon [img]="icono.Target" class="h-6 w-6" />
+          </div>
+          <h3 class="mt-4 text-lg font-bold text-slate-900">Misión</h3>
+          <p class="mt-2 whitespace-pre-line leading-7 text-slate-500">{{ c.mision }}</p>
+        </article>
+        }
+
+        @if (c.vision) {
+        <article class="rounded-2xl border border-slate-200 bg-slate-50 p-6">
+          <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
+            <lucide-icon [img]="icono.Eye" class="h-6 w-6" />
+          </div>
+          <h3 class="mt-4 text-lg font-bold text-slate-900">Visión</h3>
+          <p class="mt-2 whitespace-pre-line leading-7 text-slate-500">{{ c.vision }}</p>
+        </article>
+        }
+      </div>
+    </div>
+
+    <!-- ADMINISTRACIÓN -->
+    <aside class="h-fit rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <h2 class="flex items-center gap-2 font-semibold text-slate-900">
+        <lucide-icon [img]="icono.Landmark" class="h-5 w-5 text-slate-400" />
+        Administración
+      </h2>
+
+      <dl class="mt-5 space-y-4 text-sm">
+        @if (c.razonSocial) {
+        <div>
+          <dt class="text-xs font-medium uppercase tracking-wider text-slate-400">Razón social</dt>
+          <dd class="mt-1 text-slate-700">{{ c.razonSocial }}</dd>
+        </div>
+        }
+        @if (c.nit) {
+        <div>
+          <dt class="text-xs font-medium uppercase tracking-wider text-slate-400">NIT</dt>
+          <dd class="mt-1 text-slate-700">{{ c.nit }}</dd>
+        </div>
+        }
+        @if (c.direccion) {
+        <div>
+          <dt class="text-xs font-medium uppercase tracking-wider text-slate-400">Dirección</dt>
+          <dd class="mt-1 text-slate-700">{{ c.direccion }}</dd>
+        </div>
+        }
+        @if (c.horarioAtencion) {
+        <div>
+          <dt class="text-xs font-medium uppercase tracking-wider text-slate-400">Horario de atención</dt>
+          <dd class="mt-1 text-slate-700">{{ c.horarioAtencion }}</dd>
+        </div>
+        }
+        @if (c.telefono) {
+        <div>
+          <dt class="text-xs font-medium uppercase tracking-wider text-slate-400">Teléfono</dt>
+          <dd class="mt-1"><a [href]="'tel:' + c.telefono" class="text-blue-600 hover:underline">{{ c.telefono }}</a></dd>
+        </div>
+        }
+        @if (c.correoContacto) {
+        <div>
+          <dt class="text-xs font-medium uppercase tracking-wider text-slate-400">Correo</dt>
+          <dd class="mt-1 break-all"><a [href]="'mailto:' + c.correoContacto" class="text-blue-600 hover:underline">{{ c.correoContacto }}</a></dd>
+        </div>
+        }
+      </dl>
+    </aside>
+
+  </div>
+</section>
+
+} @else {
+<section class="mx-auto max-w-7xl px-6 py-16 text-sm text-slate-500">Cargando información...</section>
+}

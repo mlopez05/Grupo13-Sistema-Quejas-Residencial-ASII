@@ -8,6 +8,8 @@ import javax.crypto.SecretKey;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import com.portal.residencial.authservice.model.Usuario;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -23,9 +25,22 @@ public class JwtService {
     private long expiration;
 
     public String generarToken(UserDetails userDetails) {
-        return Jwts.builder()
+        var builder = Jwts.builder()
                 .subject(userDetails.getUsername())
-                .claim("roles", userDetails.getAuthorities())
+                .claim("roles", userDetails.getAuthorities());
+
+        /* DATOS DEL USUARIO QUE VIAJAN EN EL TOKEN */
+        if (userDetails instanceof Usuario usuario) {
+            builder = builder
+                    .claim("id", usuario.getId())
+                    .claim("nombre", usuario.getNombre())
+                    .claim("apellido", usuario.getApellido())
+                    .claim("rol", usuario.getRol().getNombre())
+                    /* INDICA SI DEBE CAMBIAR SU CONTRASEÑA TEMPORAL */
+                    .claim("debeCambiarClave", usuario.requiereCambioClave());
+        }
+
+        return builder
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSigningKey())

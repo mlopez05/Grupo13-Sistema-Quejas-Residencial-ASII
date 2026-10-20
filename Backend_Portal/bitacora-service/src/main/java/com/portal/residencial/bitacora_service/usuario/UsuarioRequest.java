@@ -12,7 +12,7 @@ public record UsuarioRequest(
         String valorNuevo,
         @NotBlank String tipoEvento,
         @NotBlank String ipUsuarioModificador,
-        @NotBlank Long idUsuarioModificador,
+        @NotNull Long idUsuarioModificador,
         @NotBlank String nombreUsuarioModificador,
         @NotBlank String apellidoUsuarioModificador
     ) {

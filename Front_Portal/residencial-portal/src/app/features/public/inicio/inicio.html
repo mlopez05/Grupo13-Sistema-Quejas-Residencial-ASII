@@ -1,4 +1,4 @@
-<!-- HERO -->
+<!-- PORTADA -->
 <section class="relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 text-white">
 
   <div class="absolute inset-0 opacity-20">
@@ -8,24 +8,22 @@
 
   <div class="relative mx-auto grid max-w-7xl items-center gap-12 px-6 py-24 lg:grid-cols-2 lg:py-32">
 
-    <!-- Texto principal -->
+    <!-- TEXTO PRINCIPAL -->
     <div>
 
       <div class="mb-5 inline-flex items-center rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-blue-100 backdrop-blur">
-        Comunidad, comunicación y gestión
+        {{ configuracion()?.lema || 'Comunidad, comunicación y gestión' }}
       </div>
 
       <h1 class="max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-        Bienvenido al
-        <span class="text-blue-400">
-          Portal Residencial
-        </span>
+        {{ configuracion()?.tituloBienvenida ?? 'Bienvenido' }}
       </h1>
 
-      <p class="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
-        Un espacio digital pensado para mantener nuestra comunidad
-        informada, organizada y conectada con la administración.
+      @if (configuracion()?.mensajeBienvenida; as mensaje) {
+      <p class="mt-6 max-w-2xl whitespace-pre-line text-lg leading-8 text-slate-300">
+        {{ mensaje }}
       </p>
+      }
 
       <div class="mt-8 flex flex-col gap-4 sm:flex-row">
 
@@ -48,7 +46,7 @@
     </div>
 
 
-    <!-- Tarjeta lateral -->
+    <!-- TARJETA LATERAL -->
     <div class="hidden lg:block">
 
       <div class="rounded-3xl border border-white/10 bg-white/10 p-8 shadow-2xl backdrop-blur-xl">
@@ -69,8 +67,8 @@
         <div class="mt-8 grid grid-cols-2 gap-4">
 
           <div class="rounded-2xl bg-white/10 p-5">
-            <p class="text-2xl">
-              📋
+            <p>
+              <lucide-icon [img]="icono.ClipboardList" class="h-7 w-7" />
             </p>
 
             <p class="mt-3 font-semibold">
@@ -83,8 +81,8 @@
           </div>
 
           <div class="rounded-2xl bg-white/10 p-5">
-            <p class="text-2xl">
-              📢
+            <p>
+              <lucide-icon [img]="icono.Megaphone" class="h-7 w-7" />
             </p>
 
             <p class="mt-3 font-semibold">
@@ -132,14 +130,14 @@
 
     <div class="mt-12 grid gap-6 md:grid-cols-3">
 
-      <!-- Caso -->
+      <!-- CASO -->
       <a
         routerLink="/login"
         class="group rounded-2xl border border-slate-200 bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl"
       >
 
-        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-2xl">
-          📋
+        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+          <lucide-icon [img]="icono.ClipboardList" class="h-6 w-6" />
         </div>
 
         <h3 class="mt-5 text-lg font-bold text-slate-900">
@@ -151,21 +149,22 @@
           atendidos por la administración.
         </p>
 
-        <p class="mt-5 text-sm font-semibold text-blue-600">
-          Ingresar al portal →
+        <p class="inline-flex items-center gap-1 mt-5 text-sm font-semibold text-blue-600">
+          Ingresar al portal
+          <lucide-icon [img]="icono.ArrowRight" class="h-4 w-4" />
         </p>
 
       </a>
 
 
-      <!-- Avisos -->
+      <!-- AVISOS -->
       <a
         routerLink="/avisos"
         class="group rounded-2xl border border-slate-200 bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl"
       >
 
-        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 text-2xl">
-          📢
+        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+          <lucide-icon [img]="icono.Megaphone" class="h-6 w-6" />
         </div>
 
         <h3 class="mt-5 text-lg font-bold text-slate-900">
@@ -177,21 +176,22 @@
           información relevante para los residentes.
         </p>
 
-        <p class="mt-5 text-sm font-semibold text-blue-600">
-          Consultar avisos →
+        <p class="inline-flex items-center gap-1 mt-5 text-sm font-semibold text-blue-600">
+          Consultar avisos
+          <lucide-icon [img]="icono.ArrowRight" class="h-4 w-4" />
         </p>
 
       </a>
 
 
-      <!-- Servicios -->
+      <!-- SERVICIOS -->
       <a
         routerLink="/servicios"
         class="group rounded-2xl border border-slate-200 bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl"
       >
 
-        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-2xl">
-          🏠
+        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+          <lucide-icon [img]="icono.House" class="h-6 w-6" />
         </div>
 
         <h3 class="mt-5 text-lg font-bold text-slate-900">
@@ -203,8 +203,9 @@
           quienes forman parte de nuestra comunidad.
         </p>
 
-        <p class="mt-5 text-sm font-semibold text-blue-600">
-          Ver servicios →
+        <p class="inline-flex items-center gap-1 mt-5 text-sm font-semibold text-blue-600">
+          Ver servicios
+          <lucide-icon [img]="icono.ArrowRight" class="h-4 w-4" />
         </p>
 
       </a>
@@ -226,7 +227,7 @@
 
     <div class="grid items-center gap-12 lg:grid-cols-2">
 
-      <!-- Introducción -->
+      <!-- INTRODUCCIÓN -->
       <div>
 
         <p class="text-sm font-semibold uppercase tracking-wider text-blue-600">
@@ -237,30 +238,25 @@
           Construyendo una comunidad más organizada y conectada
         </h2>
 
-        <p class="mt-6 leading-7 text-slate-600">
-          Este portal busca facilitar la comunicación entre residentes
-          y administración, proporcionando herramientas digitales que
-          permitan mejorar la atención, organización y convivencia.
+        @if (configuracion()?.descripcionComunidad; as descripcion) {
+        <p class="mt-6 whitespace-pre-line leading-7 text-slate-600">
+          {{ descripcion }}
         </p>
-
-        <p class="mt-4 leading-7 text-slate-600">
-          Nuestro objetivo es que cada residente pueda acceder fácilmente
-          a información importante y mantener una comunicación efectiva
-          con la administración.
-        </p>
+        }
 
       </div>
 
 
-      <!-- Misión y visión -->
+      <!-- MISIÓN Y VISIÓN -->
       <div class="grid gap-6">
 
+        @if (configuracion()?.mision; as mision) {
         <article class="rounded-2xl border border-slate-200 bg-white p-7 shadow-sm">
 
           <div class="flex items-start gap-4">
 
-            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-xl">
-              🎯
+            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+              <lucide-icon [img]="icono.Target" class="h-6 w-6" />
             </div>
 
             <div>
@@ -269,11 +265,8 @@
                 Nuestra misión
               </h3>
 
-              <p class="mt-2 leading-7 text-slate-500">
-                Facilitar la comunicación entre residentes y administración
-                mediante herramientas digitales que permitan atender
-                solicitudes, reportes e incidencias de manera organizada,
-                transparente y eficiente.
+              <p class="mt-2 whitespace-pre-line leading-7 text-slate-500">
+                {{ mision }}
               </p>
 
             </div>
@@ -281,14 +274,16 @@
           </div>
 
         </article>
+        }
 
 
+        @if (configuracion()?.vision; as vision) {
         <article class="rounded-2xl border border-slate-200 bg-white p-7 shadow-sm">
 
           <div class="flex items-start gap-4">
 
-            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-violet-50 text-xl">
-              👁
+            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
+              <lucide-icon [img]="icono.Eye" class="h-6 w-6" />
             </div>
 
             <div>
@@ -297,11 +292,8 @@
                 Nuestra visión
               </h3>
 
-              <p class="mt-2 leading-7 text-slate-500">
-                Ser una comunidad residencial moderna, participativa y
-                conectada, utilizando la tecnología como herramienta para
-                mejorar continuamente la convivencia y la calidad de los
-                servicios.
+              <p class="mt-2 whitespace-pre-line leading-7 text-slate-500">
+                {{ vision }}
               </p>
 
             </div>
@@ -309,6 +301,7 @@
           </div>
 
         </article>
+        }
 
       </div>
 
@@ -345,95 +338,47 @@
 
       <a
         routerLink="/avisos"
-        class="text-sm font-semibold text-blue-600 hover:text-blue-700"
+        class="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-700"
       >
-        Ver todos los avisos →
+        Ver todos los avisos
+        <lucide-icon [img]="icono.ArrowRight" class="h-4 w-4" />
       </a>
 
     </div>
 
 
+    <!-- ÚLTIMOS AVISOS -->
     <div class="mt-10 grid gap-6 lg:grid-cols-3">
 
-      <!-- Aviso 1 -->
+      @for (aviso of avisos; track aviso.id) {
       <article class="rounded-2xl border border-slate-200 bg-slate-50 p-6">
 
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between gap-3">
 
-          <span class="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
-            Mantenimiento
+          <span [class]="'rounded-full px-3 py-1 text-xs font-semibold ' + estiloCategoria[aviso.categoria]">
+            {{ aviso.categoriaEtiqueta }}
           </span>
 
           <span class="text-xs text-slate-400">
-            Próximamente
+            {{ aviso.fechaPublicacion | date: 'dd/MM/yyyy' }}
           </span>
 
         </div>
 
         <h3 class="mt-5 font-bold text-slate-900">
-          Mantenimiento de áreas comunes
+          {{ aviso.titulo }}
         </h3>
 
-        <p class="mt-3 text-sm leading-6 text-slate-500">
-          Se realizarán trabajos preventivos en las áreas comunes para
-          mantener nuestros espacios en óptimas condiciones.
+        <p class="mt-3 line-clamp-4 whitespace-pre-line text-sm leading-6 text-slate-500">
+          {{ aviso.contenido }}
         </p>
 
       </article>
-
-
-      <!-- Aviso 2 -->
-      <article class="rounded-2xl border border-slate-200 bg-slate-50 p-6">
-
-        <div class="flex items-center justify-between">
-
-          <span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">
-            Importante
-          </span>
-
-          <span class="text-xs text-slate-400">
-            Próximamente
-          </span>
-
-        </div>
-
-        <h3 class="mt-5 font-bold text-slate-900">
-          Información de servicios
-        </h3>
-
-        <p class="mt-3 text-sm leading-6 text-slate-500">
-          Consulta con anticipación cualquier actualización relacionada
-          con los servicios generales del residencial.
-        </p>
-
-      </article>
-
-
-      <!-- Aviso 3 -->
-      <article class="rounded-2xl border border-slate-200 bg-slate-50 p-6">
-
-        <div class="flex items-center justify-between">
-
-          <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
-            Comunidad
-          </span>
-
-          <span class="text-xs text-slate-400">
-            Información
-          </span>
-
-        </div>
-
-        <h3 class="mt-5 font-bold text-slate-900">
-          Recomendaciones de convivencia
-        </h3>
-
-        <p class="mt-3 text-sm leading-6 text-slate-500">
-          Una buena convivencia se construye con respeto, comunicación
-          y participación de todos los residentes.
-        </p>
-
-      </article>
+      } @empty {
+      <p class="rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500 lg:col-span-3">
+        {{ avisosCargados ? 'No hay avisos publicados por el momento.' : 'Cargando avisos...' }}
+      </p>
+      }
 
     </div>
 
@@ -468,7 +413,7 @@
     <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
 
       <div class="rounded-2xl border border-white/10 bg-white/5 p-6">
-        <p class="text-2xl">⚡</p>
+        <lucide-icon [img]="icono.Zap" class="h-7 w-7" />
         <h3 class="mt-4 font-semibold">Atención ágil</h3>
         <p class="mt-2 text-sm leading-6 text-slate-400">
           Registra solicitudes sin necesidad de realizar procesos manuales.
@@ -476,7 +421,7 @@
       </div>
 
       <div class="rounded-2xl border border-white/10 bg-white/5 p-6">
-        <p class="text-2xl">🔎</p>
+        <lucide-icon [img]="icono.Search" class="h-7 w-7" />
         <h3 class="mt-4 font-semibold">Seguimiento</h3>
         <p class="mt-2 text-sm leading-6 text-slate-400">
           Consulta el estado de tus casos desde tu cuenta.
@@ -484,7 +429,7 @@
       </div>
 
       <div class="rounded-2xl border border-white/10 bg-white/5 p-6">
-        <p class="text-2xl">📢</p>
+        <lucide-icon [img]="icono.Megaphone" class="h-7 w-7" />
         <h3 class="mt-4 font-semibold">Información</h3>
         <p class="mt-2 text-sm leading-6 text-slate-400">
           Accede a avisos y comunicados importantes.
@@ -492,7 +437,7 @@
       </div>
 
       <div class="rounded-2xl border border-white/10 bg-white/5 p-6">
-        <p class="text-2xl">🤝</p>
+        <lucide-icon [img]="icono.Handshake" class="h-7 w-7" />
         <h3 class="mt-4 font-semibold">Participación</h3>
         <p class="mt-2 text-sm leading-6 text-slate-400">
           Facilita la comunicación entre residentes y administración.
@@ -506,7 +451,7 @@
 </section>
 
 
-<!-- CTA FINAL -->
+<!-- INVITACIÓN A REGISTRARSE -->
 <section class="bg-blue-600">
 
   <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-8 px-6 py-14 text-center md:flex-row md:text-left">

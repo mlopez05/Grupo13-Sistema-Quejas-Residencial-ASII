@@ -4,6 +4,9 @@ import { Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../../../core/services/auth';
 import { RegistroRequestPortal } from '../../../../core/models/auth.models';
+import { LucideAngularModule } from 'lucide-angular';
+import { ICONOS } from '../../../../core/iconos';
+import { fechaHoy, fechaNoFuturaValidator, mayorDeEdadValidator } from '../../../../core/validators/fechas';
 
 
 function passwordsMatchValidator(
@@ -22,11 +25,15 @@ function passwordsMatchValidator(
 
 @Component({
   selector: 'app-nuevo-usuario',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, LucideAngularModule],
   templateUrl: './nuevo-usuario.html',
   styleUrl: './nuevo-usuario.css',
 })
 export class NuevoUsuario {
+
+  readonly icono = ICONOS;
+
+  readonly fechaMaxima = fechaHoy();
 
   private readonly formBuilder = inject(FormBuilder);
   private readonly router = inject(Router);
@@ -53,10 +60,14 @@ export class NuevoUsuario {
     correo: ['', [Validators.required, Validators.email]],
     clave: ['', [Validators.required, Validators.minLength(8)]],
     confirmarClave: ['', [Validators.required]],
-    fechaNacimiento: ['', [Validators.required]],
+    fechaNacimiento: ['', [Validators.required, mayorDeEdadValidator, fechaNoFuturaValidator]],
     dpi: ['', [
       Validators.required,
       Validators.pattern(/^[0-9]{13}$/),
+    ]],
+    telefono: ['', [
+      Validators.required,
+      Validators.pattern(/^[0-9]{8}$/),
     ]],
     rol: ['', [Validators.required]],
     direccion: [''],
@@ -84,6 +95,7 @@ export class NuevoUsuario {
       clave: formValue.clave,
       fecha_nacimiento: formValue.fechaNacimiento,
       dpi: formValue.dpi,
+      telefono: formValue.telefono,
       id_rol: Number(formValue.rol),
       direccion: formValue.direccion,
     };
@@ -101,6 +113,7 @@ export class NuevoUsuario {
           confirmarClave: '',
           fechaNacimiento: '',
           dpi: '',
+          telefono: '',
           rol: '',
           direccion: '',
         });
@@ -138,6 +151,16 @@ export class NuevoUsuario {
       .slice(0, 13);
 
     this.usuarioForm.controls.dpi.setValue(numericValue);
+  }
+
+  onTelefonoInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+
+    const numericValue = input.value
+      .replace(/\D/g, '')
+      .slice(0, 8);
+
+    this.usuarioForm.controls.telefono.setValue(numericValue);
   }
 
   isInvalid(controlName: keyof typeof this.usuarioForm.controls): boolean {

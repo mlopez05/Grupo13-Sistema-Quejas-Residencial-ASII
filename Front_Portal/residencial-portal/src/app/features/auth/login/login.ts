@@ -6,14 +6,18 @@ import { SessionService } from '../../../core/services/session';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { RouterLink } from '@angular/router';
+import { LucideAngularModule } from 'lucide-angular';
+import { ICONOS } from '../../../core/iconos';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, LucideAngularModule],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
 export class Login {
+
+  readonly icono = ICONOS;
 
   private readonly formBuilder = inject(FormBuilder);
   private readonly authService = inject(AuthService);
@@ -58,20 +62,17 @@ export class Login {
         this.sessionService.guardarSesion({
           token: response.token,
           usuario: response.usuario,
-          rol: response.rol
+          rol: response.rol,
+          debeCambiarClave: response.debeCambiarClave,
         });
 
-        if (response.rol === 'Administrador' ||
-          response.rol === 'Supervisor' ||
-          response.rol === 'Analista') {
-
-          this.router.navigate(['/admin/dashboard']);
-
-        } else {
-
-          this.router.navigate(['/dashboard']);
-
+        /* CON CONTRASEÑA TEMPORAL PRIMERO DEBE CAMBIARLA */
+        if (response.debeCambiarClave) {
+          this.router.navigate(['/cambiar-clave-inicial']);
+          return;
         }
+
+        this.router.navigate([this.sessionService.rutaInicio()]);
       },
 
       error: (error: HttpErrorResponse) => {

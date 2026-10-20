@@ -47,7 +47,13 @@ public class Usuario implements UserDetails{
     private LocalTime hora_registro;
     private String estado;
 
-    // Métodos requeridos por UserDetails
+    private Boolean debeCambiarClave;
+
+    public boolean requiereCambioClave() {
+        return Boolean.TRUE.equals(debeCambiarClave);
+    }
+
+    /* MÉTODOS QUE PIDE SPRING SECURITY */
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -61,5 +67,11 @@ public class Usuario implements UserDetails{
     @Override
     public String getUsername() {
         return this.correo;
+    }
+
+    /* SOLO SE BLOQUEA AL USUARIO INACTIVO */
+    @Override
+    public boolean isEnabled() {
+        return !"Inactivo".equals(this.estado);
     }
 }

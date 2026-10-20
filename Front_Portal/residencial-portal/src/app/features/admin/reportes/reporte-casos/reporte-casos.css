@@ -1,0 +1,13 @@
+/* COLORES DE LAS GRÁFICAS */
+:host {
+  --serie-1: #2a78d6;
+  --serie-2: #eb6834;
+}
+
+.serie-1 {
+  background-color: var(--serie-1);
+}
+
+.serie-2 {
+  background-color: var(--serie-2);
+}
