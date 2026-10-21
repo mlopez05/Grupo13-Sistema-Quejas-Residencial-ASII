@@ -194,6 +194,10 @@ public class AuditoriaService {
             return "Cambio de contraseña de " + afectado;
         }
 
+        if ("RESTABLECIMIENTO_CLAVE".equals(u.getTipo_evento())) {
+            return "Restablecimiento de contraseña de " + afectado + " por enlace de recuperación";
+        }
+
         return "Modificó \"" + valor(u.getCampo_modificado()) + "\" de " + afectado + ": "
                 + valor(u.getValor_anterior()) + " → " + valor(u.getValor_nuevo());
     }

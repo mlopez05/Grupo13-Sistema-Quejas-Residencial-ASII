@@ -62,8 +62,12 @@
         </div>
         <div>
           <label for="nit" class="mb-1.5 block text-sm font-medium text-slate-700">NIT</label>
-          <input id="nit" name="nit" maxlength="30" [(ngModel)]="c.nit"
+          <input id="nit" name="nit" maxlength="14" [(ngModel)]="c.nit" (input)="limpiarNit($event)"
+            placeholder="Ej. 1234567-K"
             class="block w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
+          @if (nitInvalido) {
+          <p class="mt-1.5 text-sm text-red-600">El NIT debe tener el formato 1234567-8 o 1234567-K.</p>
+          }
         </div>
         <div class="md:col-span-2">
           <label for="direccion" class="mb-1.5 block text-sm font-medium text-slate-700">Dirección</label>
@@ -72,8 +76,12 @@
         </div>
         <div>
           <label for="telefono" class="mb-1.5 block text-sm font-medium text-slate-700">Teléfono</label>
-          <input id="telefono" name="telefono" maxlength="30" [(ngModel)]="c.telefono"
+          <input id="telefono" name="telefono" maxlength="8" inputmode="numeric" [(ngModel)]="c.telefono"
+            (input)="limpiarTelefono($event)" placeholder="8 números"
             class="block w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
+          @if (telefonoInvalido) {
+          <p class="mt-1.5 text-sm text-red-600">El teléfono debe tener 8 números.</p>
+          }
         </div>
         <div>
           <label for="correoContacto" class="mb-1.5 block text-sm font-medium text-slate-700">Correo de contacto</label>

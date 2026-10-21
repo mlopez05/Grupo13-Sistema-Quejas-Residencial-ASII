@@ -22,6 +22,9 @@ public class PlantillaNotificacion {
             case TRASLADO_AUTORIZACION -> "Caso #" + datos.get("numeroCaso") + " pendiente de autorización";
             case AVANCE_REGISTRADO -> "Nuevo avance en tu caso #" + datos.get("numeroCaso");
             case INFORMACION_AGREGADA -> "El residente agregó información al caso #" + datos.get("numeroCaso");
+            case BIENVENIDA_PERSONAL -> "Tu cuenta en el Portal Residencial";
+            case CASO_REASIGNADO -> "El caso #" + datos.get("numeroCaso") + " fue reasignado";
+            case CAMBIO_ANALISTA -> "Nuevo analista en tu caso #" + datos.get("numeroCaso");
         };
     }
 
@@ -40,6 +43,11 @@ public class PlantillaNotificacion {
             case AVANCE_REGISTRADO -> "El analista registró un avance en tu caso \"" + datos.get("titulo") + "\".";
             case INFORMACION_AGREGADA ->
                 "El residente agregó información al caso \"" + datos.get("titulo") + "\". Revisa el seguimiento.";
+            case BIENVENIDA_PERSONAL -> "Se creó tu cuenta como " + datos.get("rol") + ".";
+            case CASO_REASIGNADO ->
+                "El caso \"" + datos.get("titulo") + "\" fue reasignado a otro analista y ya no está a tu cargo.";
+            case CAMBIO_ANALISTA ->
+                "Tu caso \"" + datos.get("titulo") + "\" ahora lo atiende " + datos.get("analista") + ".";
         };
     }
 
@@ -47,6 +55,15 @@ public class PlantillaNotificacion {
     public String cuerpoCorreo(TipoNotificacion tipo, Map<String, String> datos) {
         if (tipo == TipoNotificacion.BIENVENIDA_RESIDENTE || tipo == TipoNotificacion.RECUPERACION_PASSWORD) {
             return cuerpo(tipo, datos);
+        }
+
+        if (tipo == TipoNotificacion.BIENVENIDA_PERSONAL) {
+            return htmlBienvenidaPersonal.formatted(
+                    escapar(datos.get("nombre")),
+                    escapar(datos.get("rol")),
+                    escapar(datos.get("correo")),
+                    escapar(datos.get("claveTemporal")),
+                    frontendUrl + "/login");
         }
 
         return htmlCaso.formatted(
@@ -78,6 +95,36 @@ public class PlantillaNotificacion {
               </div>
 
               <p>Ingresa al portal para ver el detalle y dar seguimiento al caso.</p>
+
+              <p style="text-align: center; margin: 24px 0;">
+                <a href="%s"
+                   style="background-color: #2563eb; color: #ffffff; padding: 12px 24px; text-decoration: none;
+                          border-radius: 6px; font-weight: bold; display: inline-block;">
+                  Ingresar al portal
+                </a>
+              </p>
+
+              <p style="font-size: 12px; color: #94a3b8;">
+                Este es un mensaje automático del Portal Residencial. No respondas a este correo.
+              </p>
+            </div>
+            """;
+
+    /* BIENVENIDA DEL PERSONAL CON SU CONTRASEÑA TEMPORAL */
+    private final String htmlBienvenidaPersonal = """
+            <div style="font-family: Arial, sans-serif; max-width: 520px; margin: auto; color: #334155; line-height: 1.6;">
+              <h2 style="color: #0f172a; margin-bottom: 8px;">¡Bienvenido, %s!</h2>
+
+              <p style="margin-top: 0;">El administrador creó tu cuenta en el Portal Residencial con el rol de <strong>%s</strong>.</p>
+
+              <div style="background-color: #f1f5f9; border-radius: 8px; padding: 14px 18px; margin: 20px 0;">
+                <p style="margin: 0; font-size: 13px; color: #64748b;">Usuario</p>
+                <p style="margin: 2px 0 10px; font-weight: bold; color: #0f172a;">%s</p>
+                <p style="margin: 0; font-size: 13px; color: #64748b;">Contraseña temporal</p>
+                <p style="margin: 2px 0 0; font-weight: bold; color: #0f172a; font-family: monospace; font-size: 16px;">%s</p>
+              </div>
+
+              <p>Al ingresar por primera vez el portal te pedirá cambiar esta contraseña por una propia.</p>
 
               <p style="text-align: center; margin: 24px 0;">
                 <a href="%s"

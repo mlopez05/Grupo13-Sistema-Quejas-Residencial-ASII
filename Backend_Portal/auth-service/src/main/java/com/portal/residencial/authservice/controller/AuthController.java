@@ -79,8 +79,9 @@ public class AuthController {
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
-        usuarioService.restablecerPassword(request.token(), request.nuevaPassword());
+    public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest request,
+            HttpServletRequest httpRequest) {
+        usuarioService.restablecerPassword(request.token(), request.nuevaPassword(), httpRequest.getRemoteAddr());
         return ResponseEntity.ok().build();
     }
 }

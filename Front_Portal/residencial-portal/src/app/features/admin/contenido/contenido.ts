@@ -57,7 +57,7 @@ export class Contenido implements OnInit {
     this.contenidoService.obtenerConfiguracionAdmin().subscribe({
       next: (configuracion) => { this.configuracion = configuracion; this.cdr.markForCheck(); },
       error: () => {
-        this.errorConfiguracion = 'No se pudo cargar la configuración. Verifica que contenido-service esté en ejecución.';
+        this.errorConfiguracion = 'No se pudo cargar la información del portal. Intente más tarde.';
         this.cdr.markForCheck();
       },
     });
@@ -78,6 +78,11 @@ export class Contenido implements OnInit {
       return;
     }
 
+    if (this.telefonoInvalido || this.nitInvalido) {
+      this.errorConfiguracion = 'Revisa el teléfono y el NIT.';
+      return;
+    }
+
     this.guardandoConfiguracion = true;
     this.errorConfiguracion = '';
     this.mensajeConfiguracion = '';
@@ -95,6 +100,33 @@ export class Contenido implements OnInit {
         this.cdr.markForCheck();
       },
     });
+  }
+
+  /* TELÉFONO: SOLO NÚMEROS MIENTRAS SE ESCRIBE */
+  limpiarTelefono(evento: Event): void {
+    const campo = evento.target as HTMLInputElement;
+    campo.value = campo.value.replace(/\D/g, '').slice(0, 8);
+    this.configuracion!.telefono = campo.value;
+  }
+
+  /* NIT: SOLO NÚMEROS, UNA K AL FINAL Y EL GUION ANTES DEL ÚLTIMO CARÁCTER */
+  limpiarNit(evento: Event): void {
+    const campo = evento.target as HTMLInputElement;
+    const texto = campo.value.toUpperCase().replace(/[^0-9K]/g, '');
+    const sinK = texto.replace(/K/g, '');
+    const limpio = (texto.endsWith('K') ? sinK + 'K' : sinK).slice(0, 13);
+    campo.value = limpio.length > 1 ? `${limpio.slice(0, -1)}-${limpio.slice(-1)}` : limpio;
+    this.configuracion!.nit = campo.value;
+  }
+
+  get telefonoInvalido(): boolean {
+    const telefono = this.configuracion?.telefono;
+    return !!telefono && !/^[0-9]{8}$/.test(telefono);
+  }
+
+  get nitInvalido(): boolean {
+    const nit = this.configuracion?.nit;
+    return !!nit && !/^[0-9]{1,12}-[0-9K]$/.test(nit);
   }
 
   /* AVISOS */

@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.portal.residencial.authservice.bitacora.BitacoraClient;
+import com.portal.residencial.authservice.casos.CasosClient;
 import com.portal.residencial.authservice.dto.ActualizarPerfilRequest;
 import com.portal.residencial.authservice.dto.CambiarClaveRequest;
 import com.portal.residencial.authservice.dto.ActualizarUsuarioRequest;
@@ -40,6 +41,9 @@ public class UsuarioService {
         private final NotificacionClient notificacionClient;
         private final BitacoraClient bitacoraClient;
         private final JwtService jwtService;
+        private final CasosClient casosClient;
+
+        private static final String ROL_ANALISTA = "Analista";
 
         private static final int EDAD_MINIMA = 18;
 
@@ -124,6 +128,10 @@ public class UsuarioService {
 
                 Usuario usuarioRegistrado = usuarioRepository.save(usuario);
 
+                /* ENVÍA SU USUARIO Y CONTRASEÑA TEMPORAL POR CORREO */
+                notificacionClient.enviarBienvenidaPersonal(usuarioRegistrado.getCorreo(),
+                                usuarioRegistrado.getNombre(), rol.getNombre(), request.getClave());
+
                 RegistroResponse uResponse = RegistroResponse.builder()
                                 .usuario(usuarioRegistrado.getCorreo())
                                 .nombre(usuarioRegistrado.getNombre())
@@ -166,7 +174,8 @@ public class UsuarioService {
                                 usuario.getId(), usuario.getNombre(), usuario.getApellido());
         }
 
-        public void restablecerPassword(String token, String nuevaPassword) {
+        /* RESTABLECE LA CONTRASEÑA CON EL ENLACE DEL CORREO */
+        public void restablecerPassword(String token, String nuevaPassword, String ip) {
                 String correo;
                 try {
                         correo = jwtService.extraerUsername(token);
@@ -184,6 +193,12 @@ public class UsuarioService {
                 /* AL RESTABLECERLA DEJA DE SER TEMPORAL */
                 usuario.setDebeCambiarClave(false);
                 usuarioRepository.save(usuario);
+
+                /* LA CONTRASEÑA NUNCA VA A BITÁCORA: SOLO ********  */
+                bitacoraClient.registrarCambioUsuario(
+                                usuario.getId(), usuario.getNombre(), usuario.getApellido(),
+                                "clave", "********", "********", "RESTABLECIMIENTO_CLAVE", ip,
+                                usuario.getId(), usuario.getNombre(), usuario.getApellido());
         }
 
         /* LA FECHA DE NACIMIENTO NO PUEDE SER FUTURA Y DEBE SER MAYOR DE EDAD */
@@ -265,6 +280,20 @@ public class UsuarioService {
                                 && usuarioExistente.getId().equals(usuarioModificador.getId())) {
                         throw new BusinessException("No puede inactivar su propia cuenta.",
                                         HttpStatus.BAD_REQUEST);
+                }
+
+                /* UN ANALISTA CON CASOS EN CURSO NO SE PUEDE INACTIVAR */
+                if ("Inactivo".equals(request.estado()) && !"Inactivo".equals(usuarioExistente.getEstado())
+                                && usuarioExistente.getRol() != null
+                                && ROL_ANALISTA.equalsIgnoreCase(usuarioExistente.getRol().getNombre())) {
+                        long casosEnCurso = casosClient.contarCasosEnCurso(usuarioExistente.getId());
+
+                        if (casosEnCurso > 0) {
+                                throw new BusinessException("El analista tiene " + casosEnCurso
+                                                + (casosEnCurso == 1 ? " caso asignado en curso" : " casos asignados en curso")
+                                                + ". Reasígnalos a otro analista antes de inactivarlo.",
+                                                HttpStatus.CONFLICT);
+                        }
                 }
 
                 aplicarActualizacion(usuarioExistente, usuarioModificador, request, ip);

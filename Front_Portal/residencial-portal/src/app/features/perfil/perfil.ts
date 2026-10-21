@@ -7,7 +7,7 @@ import { AuthService } from '../../core/services/auth';
 import { ActualizarPerfilRequest, UsuarioResponse } from '../../core/models/usuario.models';
 import { ICONOS } from '../../core/iconos';
 import { LONGITUD_MINIMA_CLAVE, PATRON_CLAVE, validarCambioClave } from '../../core/validators/claves';
-import { fechaHoy, fechaNoFuturaValidator, mayorDeEdadValidator } from '../../core/validators/fechas';
+import { fechaMaximaNacimiento, fechaNoFuturaValidator, mayorDeEdadValidator } from '../../core/validators/fechas';
 
 /* NO PERMITE TEXTO VACÍO */
 const NO_SOLO_ESPACIOS = /\S/;
@@ -39,7 +39,7 @@ export class Perfil implements OnInit, OnDestroy {
 
   readonly icono = ICONOS;
 
-  readonly fechaMaxima = fechaHoy();
+  readonly fechaMaxima = fechaMaximaNacimiento();
 
   cambiandoClave = false;
   guardandoClave = false;

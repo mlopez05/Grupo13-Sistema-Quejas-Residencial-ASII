@@ -6,7 +6,7 @@ import { AuthService } from '../../../../core/services/auth';
 import { RegistroRequestPortal } from '../../../../core/models/auth.models';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONOS } from '../../../../core/iconos';
-import { fechaHoy, fechaNoFuturaValidator, mayorDeEdadValidator } from '../../../../core/validators/fechas';
+import { fechaMaximaNacimiento, fechaNoFuturaValidator, mayorDeEdadValidator } from '../../../../core/validators/fechas';
 
 
 function passwordsMatchValidator(
@@ -33,7 +33,7 @@ export class NuevoUsuario {
 
   readonly icono = ICONOS;
 
-  readonly fechaMaxima = fechaHoy();
+  readonly fechaMaxima = fechaMaximaNacimiento();
 
   private readonly formBuilder = inject(FormBuilder);
   private readonly router = inject(Router);

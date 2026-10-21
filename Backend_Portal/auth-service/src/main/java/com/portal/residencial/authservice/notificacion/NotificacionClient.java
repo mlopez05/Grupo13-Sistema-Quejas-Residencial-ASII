@@ -55,4 +55,18 @@ public class NotificacionClient {
             log.error("No se pudo enviar el correo de bienvenida a {}: {}", correo, e.getMessage());
         }
     }
+
+    /* BIENVENIDA DEL PERSONAL CON SU CONTRASEÑA TEMPORAL */
+    @Async
+    public void enviarBienvenidaPersonal(String correo, String nombre, String rol, String claveTemporal) {
+        try {
+            NotificacionRequest request = new NotificacionRequest(
+                    correo,
+                    TipoNotificacion.BIENVENIDA_PERSONAL,
+                    Map.of("nombre", nombre, "rol", rol, "correo", correo, "claveTemporal", claveTemporal));
+            restTemplate.postForEntity(notificacionesUrl + "/notificaciones", request, Void.class);
+        } catch (Exception e) {
+            log.error("No se pudo enviar el correo de bienvenida del personal a {}: {}", correo, e.getMessage());
+        }
+    }
 }

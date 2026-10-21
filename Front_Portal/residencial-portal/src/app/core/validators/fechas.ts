@@ -15,6 +15,18 @@ export function fechaHoy(): string {
   ].join('-');
 }
 
+/* ÚLTIMA FECHA DE NACIMIENTO PERMITIDA (HACE 18 AÑOS) */
+export function fechaMaximaNacimiento(): string {
+  const limite = new Date();
+  limite.setFullYear(limite.getFullYear() - EDAD_MINIMA);
+
+  return [
+    limite.getFullYear(),
+    String(limite.getMonth() + 1).padStart(2, '0'),
+    String(limite.getDate()).padStart(2, '0'),
+  ].join('-');
+}
+
 export function mayorDeEdadValidator(control: AbstractControl): ValidationErrors | null {
   if (!control.value) return null;
 

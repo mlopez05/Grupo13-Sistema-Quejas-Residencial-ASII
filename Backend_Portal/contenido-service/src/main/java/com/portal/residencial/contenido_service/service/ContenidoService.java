@@ -49,7 +49,7 @@ public class ContenidoService {
         c.setNombreResidencial(texto(dto.nombreResidencial()));
         c.setLema(texto(dto.lema()));
         c.setRazonSocial(texto(dto.razonSocial()));
-        c.setNit(texto(dto.nit()));
+        c.setNit(dto.nit() == null ? null : texto(dto.nit().toUpperCase()));
         c.setDireccion(texto(dto.direccion()));
         c.setTelefono(texto(dto.telefono()));
         c.setCorreoContacto(texto(dto.correoContacto()));

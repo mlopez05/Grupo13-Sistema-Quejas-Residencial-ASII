@@ -1,6 +1,7 @@
 package com.portal.residencial.casos_service.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -91,6 +92,13 @@ public class CasoController {
     @PreAuthorize("hasAnyAuthority('Supervisor', 'Administrador')")
     public ResponseEntity<List<AnalistaResponse>> analistas(@AuthenticationPrincipal UsuarioAutenticado usuario) {
         return ResponseEntity.ok(casoService.listarAnalistas(usuario));
+    }
+
+    /* CASOS EN CURSO DE UN ANALISTA (LO CONSULTA AUTH-SERVICE ANTES DE INACTIVARLO) */
+    @GetMapping("/analistas/{idAnalista}/casos-en-curso")
+    @PreAuthorize("hasAuthority('Administrador')")
+    public ResponseEntity<Map<String, Long>> casosEnCurso(@PathVariable Long idAnalista) {
+        return ResponseEntity.ok(Map.of("casosEnCurso", casoService.contarCasosEnCurso(idAnalista)));
     }
 
     /* DETALLE DEL CASO */

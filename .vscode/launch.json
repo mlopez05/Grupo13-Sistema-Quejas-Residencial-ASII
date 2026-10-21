@@ -39,6 +39,16 @@
             "projectName": "casos-service",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-ContenidoServiceApplication<contenido-service>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.portal.residencial.contenido_service.ContenidoServiceApplication",
+            "projectName": "contenido-service",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }

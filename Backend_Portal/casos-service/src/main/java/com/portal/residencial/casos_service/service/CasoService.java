@@ -219,6 +219,7 @@ public class CasoService {
                 .orElseThrow(() -> new BusinessException("El analista no existe o está inactivo.",
                         HttpStatus.BAD_REQUEST));
 
+        String correoAnterior = caso.getCorreoAnalista();
         TipoSeguimiento tipo = caso.getIdAnalista() == null ? TipoSeguimiento.ASIGNACION : TipoSeguimiento.REASIGNACION;
         String comentario = caso.getIdAnalista() == null
                 ? "Caso asignado a " + analista.nombreCompleto() + "."
@@ -226,7 +227,28 @@ public class CasoService {
 
         asignarAnalista(caso, analista, tipo, comentario, supervisor, ip);
 
+        if (tipo == TipoSeguimiento.REASIGNACION) {
+            notificarReasignacion(caso, correoAnterior, analista.nombreCompleto());
+        }
+
         return aDetalle(caso);
+    }
+
+    /* AVISA AL ANALISTA ANTERIOR Y AL RESIDENTE */
+    private void notificarReasignacion(Caso caso, String correoAnterior, String nuevoAnalista) {
+        /* SIN ID DEL CASO: EL ANALISTA ANTERIOR YA NO PUEDE ABRIRLO, SOLO RECIBE EL CORREO */
+        Map<String, String> datosAnterior = datosBase(caso);
+        datosAnterior.remove("idCaso");
+        notificacionClient.enviar(correoAnterior, TipoNotificacion.CASO_REASIGNADO, datosAnterior);
+
+        Map<String, String> datosResidente = datosBase(caso);
+        datosResidente.put("analista", nuevoAnalista);
+        notificacionClient.enviar(caso.getCorreoResidente(), TipoNotificacion.CAMBIO_ANALISTA, datosResidente);
+    }
+
+    /* CASOS EN CURSO DE UN ANALISTA */
+    public long contarCasosEnCurso(Long idAnalista) {
+        return casoRepository.countByIdAnalistaAndEstadoIn(idAnalista, EstadoCaso.ACTIVOS);
     }
 
     /* ANALISTAS CON SUS CASOS EN CURSO */

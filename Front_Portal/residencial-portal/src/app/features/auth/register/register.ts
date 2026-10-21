@@ -12,7 +12,7 @@ import {
 } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONOS } from '../../../core/iconos';
-import { fechaHoy, fechaNoFuturaValidator, mayorDeEdadValidator } from '../../../core/validators/fechas';
+import { fechaMaximaNacimiento, fechaNoFuturaValidator, mayorDeEdadValidator } from '../../../core/validators/fechas';
 
 function passwordsMatchValidator(
   control: AbstractControl
@@ -50,7 +50,7 @@ export class Register {
   mostrarModal = false;
 
 
-  readonly fechaMaxima = fechaHoy();
+  readonly fechaMaxima = fechaMaximaNacimiento();
 
 
   readonly registerForm = this.formBuilder.group({

@@ -6,7 +6,7 @@ import { UsuarioService } from '../../../../core/services/usuario';
 import { ActualizarUsuarioRequest, UsuarioResponse } from '../../../../core/models/usuario.models';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONOS } from '../../../../core/iconos';
-import { fechaHoy, fechaNoFuturaValidator, mayorDeEdadValidator } from '../../../../core/validators/fechas';
+import { fechaMaximaNacimiento, fechaNoFuturaValidator, mayorDeEdadValidator } from '../../../../core/validators/fechas';
 
 /* NO PERMITE TEXTO VACÍO */
 const NO_SOLO_ESPACIOS = /\S/;
@@ -21,7 +21,7 @@ export class EditarUsuario implements OnInit {
 
   readonly icono = ICONOS;
 
-  readonly fechaMaxima = fechaHoy();
+  readonly fechaMaxima = fechaMaximaNacimiento();
 
   private readonly formBuilder = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);
