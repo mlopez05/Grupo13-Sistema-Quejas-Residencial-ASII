@@ -249,7 +249,7 @@
                         <div class="relative">
 
                             <input id="clave" [type]="showPassword ? 'text' : 'password'" formControlName="clave"
-                                placeholder="Mínimo 8 caracteres"
+                                placeholder="Mínimo 8, con mayúscula, minúscula y número"
                                 class="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 pr-12 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" />
 
                             <button type="button" (click)="togglePasswordVisibility()"
@@ -276,6 +276,12 @@
                         @if (usuarioForm.controls.clave.hasError('minlength')) {
                         <p class="mt-2 text-sm text-red-600">
                             La contraseña debe tener al menos 8 caracteres.
+                        </p>
+                        }
+
+                        @if (usuarioForm.controls.clave.hasError('pattern')) {
+                        <p class="mt-2 text-sm text-red-600">
+                            Debe incluir al menos una mayúscula, una minúscula y un número.
                         </p>
                         }
 

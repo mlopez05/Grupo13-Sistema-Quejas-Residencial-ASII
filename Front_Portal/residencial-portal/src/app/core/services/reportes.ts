@@ -10,6 +10,7 @@ import {
   ReporteCasosResponse,
   TipoAuditoria,
 } from '../models/reporte.models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -17,8 +18,8 @@ import {
 export class ReportesService {
   private readonly http = inject(HttpClient);
 
-  private readonly casosUrl = 'http://localhost:8081/api/casos/reportes';
-  private readonly bitacoraUrl = 'http://localhost:8085/bitacora/reportes';
+  private readonly casosUrl = `${environment.casosUrl}/api/casos/reportes`;
+  private readonly bitacoraUrl = `${environment.bitacoraUrl}/bitacora/reportes`;
 
   /* REPORTE DE CASOS */
 

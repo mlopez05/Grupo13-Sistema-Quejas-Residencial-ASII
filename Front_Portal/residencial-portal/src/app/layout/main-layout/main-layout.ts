@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { SessionService } from '../../core/services/session';
+import { AuthService } from '../../core/services/auth';
 import { NotificacionesService } from '../../core/services/notificaciones';
 import { CampanaNotificaciones } from '../../features/notificaciones/campana-notificaciones/campana-notificaciones';
 import { LucideAngularModule } from 'lucide-angular';
@@ -18,6 +19,7 @@ export class MainLayout implements OnInit, OnDestroy {
 
   private readonly sessionService = inject(SessionService);
   private readonly notificacionesService = inject(NotificacionesService);
+  private readonly authService = inject(AuthService);
 
   readonly session = this.sessionService.obtenerSesion();
 
@@ -30,9 +32,9 @@ export class MainLayout implements OnInit, OnDestroy {
     this.notificacionesService.detener();
   }
 
+  /* REGISTRA EL CIERRE EN BITÁCORA Y VUELVE AL INICIO DE SESIÓN */
   cerrarSesion(): void {
     this.notificacionesService.detener();
-    this.sessionService.cerrarSesion();
-    window.location.href = '/login';
+    this.authService.cerrarSesion();
   }
 }

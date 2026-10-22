@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.portal.residencial.authservice.model.Usuario;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +24,9 @@ public class JwtService {
 
     @Value("${jwt.expiration}")
     private long expiration;
+
+    private static final String CLAIM_TIPO = "tipo";
+    private static final String TIPO_RECUPERACION = "RECUPERACION";
 
     public String generarToken(UserDetails userDetails) {
         var builder = Jwts.builder()
@@ -51,9 +55,23 @@ public class JwtService {
         return extraerClaims(token).getSubject();
     }
 
+    /* EL TOKEN DEL ENLACE DE RECUPERACIÓN NO SIRVE COMO SESIÓN */
     public boolean esTokenValido(String token, UserDetails userDetails) {
-        String username = extraerUsername(token);
-        return username.equals(userDetails.getUsername()) && !estaExpirado(token);
+        Claims claims = extraerClaims(token);
+        return claims.getSubject().equals(userDetails.getUsername())
+                && claims.get(CLAIM_TIPO) == null
+                && !estaExpirado(token);
+    }
+
+    /* SOLO ACEPTA TOKENS DEL ENLACE DE RECUPERACIÓN */
+    public Claims validarTokenRecuperacion(String token) {
+        Claims claims = extraerClaims(token);
+
+        if (!TIPO_RECUPERACION.equals(claims.get(CLAIM_TIPO))) {
+            throw new JwtException("El token no es de recuperación.");
+        }
+
+        return claims;
     }
 
     private boolean estaExpirado(String token) {
@@ -76,6 +94,7 @@ public class JwtService {
     public String generarTokenRecuperacion(String correo) {
         return Jwts.builder()
                 .subject(correo)
+                .claim(CLAIM_TIPO, TIPO_RECUPERACION)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + 1800000)) 
                 .signWith(getSigningKey())

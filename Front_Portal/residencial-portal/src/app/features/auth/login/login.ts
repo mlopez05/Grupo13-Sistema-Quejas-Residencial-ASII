@@ -57,8 +57,6 @@ export class Login {
 
     this.authService.login(request).subscribe({
       next: (response: LoginResponse) => {
-        console.log('Login exitoso', response);
-
         this.sessionService.guardarSesion({
           token: response.token,
           usuario: response.usuario,
@@ -76,8 +74,6 @@ export class Login {
       },
 
       error: (error: HttpErrorResponse) => {
-        console.log('Error en login', error);
-
         this.loginExitoso = false;
 
         if (error.status === 401 || error.status === 403) {
@@ -94,8 +90,6 @@ export class Login {
         this.cdr.markForCheck();
       }
     });
-
-    console.log('Formulario válido:', this.loginForm.getRawValue());
   }
 
   togglePasswordVisibility(): void {

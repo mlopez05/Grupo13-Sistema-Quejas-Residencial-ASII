@@ -2,16 +2,16 @@ package com.portal.residencial.bitacora_service.sesion;
 
 import jakarta.validation.constraints.NotBlank;
 
-import jakarta.validation.constraints.NotNull;
 
 public record SesionRequest(
 
-        @NotNull Long idUsuario,
+        /* EN UN INTENTO FALLIDO CON UN CORREO NO REGISTRADO SOLO LLEGAN EL CORREO, LA IP Y EL EVENTO */
+        Long idUsuario,
         @NotBlank String ipUsuario,
         @NotBlank String correoUsuario,
-        @NotBlank String nombreUsuario,
-        @NotBlank String apellidoUsuario,
-        @NotBlank String rolUsuario,
+        String nombreUsuario,
+        String apellidoUsuario,
+        String rolUsuario,
         @NotBlank String tipoEvento
 ) {}
  

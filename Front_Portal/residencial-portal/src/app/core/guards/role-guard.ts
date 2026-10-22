@@ -15,5 +15,6 @@ export const roleGuard: CanActivateFn = (route) => {
     return true;
   }
 
-  return router.createUrlTree(['/dashboard']);
+  /* SIN PERMISO: VUELVE A SU PANTALLA DE INICIO */
+  return router.createUrlTree([sessionService.rutaInicio()]);
 };

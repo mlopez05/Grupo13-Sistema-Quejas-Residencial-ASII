@@ -4,6 +4,7 @@ import { Subject, forkJoin } from 'rxjs';
 import { Client } from '@stomp/stompjs';
 import { SessionService } from './session';
 import { NotificacionResponse, NovedadCaso } from '../models/notificacion.models';
+import { environment } from '../../../environments/environment';
 
 /* ALERTAS INTERNAS DEL PORTAL */
 @Injectable({
@@ -13,8 +14,8 @@ export class NotificacionesService {
   private readonly http = inject(HttpClient);
   private readonly sessionService = inject(SessionService);
 
-  private readonly apiUrl = 'http://localhost:8084/notificaciones';
-  private readonly wsUrl = 'ws://localhost:8084/ws';
+  private readonly apiUrl = `${environment.notificacionesUrl}/notificaciones`;
+  private readonly wsUrl = environment.wsUrl;
 
   private cliente: Client | null = null;
 

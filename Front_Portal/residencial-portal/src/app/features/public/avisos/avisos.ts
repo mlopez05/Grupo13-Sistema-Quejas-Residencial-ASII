@@ -1,5 +1,6 @@
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONOS } from '../../../core/iconos';
 import { ContenidoService } from '../../../core/services/contenido';
@@ -21,6 +22,9 @@ export class Avisos implements OnInit {
   readonly icono = ICONOS;
   readonly categorias = CATEGORIAS_AVISO;
   readonly estiloCategoria = ESTILO_CATEGORIA_AVISO;
+
+  /* SE MUESTRA DENTRO DEL ÁREA DEL RESIDENTE */
+  readonly interno = inject(ActivatedRoute).snapshot.data['interno'] === true;
 
   private readonly contenidoService = inject(ContenidoService);
   private readonly cdr = inject(ChangeDetectorRef);

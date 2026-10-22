@@ -132,9 +132,7 @@ export class Register {
     };
 
     this.authService.registrarUsuario(request).subscribe({
-      next: (response) => {
-        console.log('Registro exitoso:', response);
-
+      next: () => {
         this.registroExitoso = true;
         this.mensajeError = '';
         this.mostrarModal = true;
@@ -148,8 +146,6 @@ export class Register {
       },
 
       error: (error: HttpErrorResponse) => {
-        console.error('Error en registro:', error);
-
         this.registroExitoso = false;
 
         if (error.status === 409) {
@@ -164,10 +160,6 @@ export class Register {
 
         this.mostrarModal = true;
         this.changeDetectorRef.markForCheck();
-        console.log('registroExitoso:', this.registroExitoso);
-        console.log('mensajeError:', this.mensajeError);
-        console.log('mostrarModal:', this.mostrarModal);
-
       },
     });
   }

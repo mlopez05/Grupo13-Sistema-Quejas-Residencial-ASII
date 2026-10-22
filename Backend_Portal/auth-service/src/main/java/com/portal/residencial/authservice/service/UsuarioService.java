@@ -1,7 +1,10 @@
 package com.portal.residencial.authservice.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 
@@ -27,11 +30,14 @@ import com.portal.residencial.authservice.notificacion.NotificacionClient;
 import com.portal.residencial.authservice.repository.RolRepository;
 import com.portal.residencial.authservice.repository.UsuarioRepository;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class UsuarioService {
 
@@ -141,11 +147,12 @@ public class UsuarioService {
                 return uResponse;
         }
 
+        /* SIEMPRE RESPONDE IGUAL PARA NO REVELAR QUÉ CORREOS ESTÁN REGISTRADOS */
         public void solicitarRecuperacion(String correo) {
-                usuarioRepository.findByCorreo(correo)
-                                .orElseThrow(() -> new BusinessException(
-                                                "El correo ingresado no está registrado en el sistema.",
-                                                HttpStatus.NOT_FOUND));
+                if (usuarioRepository.findByCorreo(correo).isEmpty()) {
+                        log.info("Solicitud de recuperación para un correo no registrado.");
+                        return;
+                }
 
                 String token = jwtService.generarTokenRecuperacion(correo);
                 notificacionClient.enviarRecuperacionPassword(correo, token);
@@ -166,6 +173,7 @@ public class UsuarioService {
 
                 usuario.setClave(passwordEncoder.encode(request.claveNueva()));
                 usuario.setDebeCambiarClave(false); /* YA NO ES TEMPORAL */
+                usuario.setFechaCambioClave(LocalDateTime.now());
                 usuarioRepository.save(usuario);
 
                 bitacoraClient.registrarCambioUsuario(
@@ -176,20 +184,31 @@ public class UsuarioService {
 
         /* RESTABLECE LA CONTRASEÑA CON EL ENLACE DEL CORREO */
         public void restablecerPassword(String token, String nuevaPassword, String ip) {
-                String correo;
+                Claims claims;
                 try {
-                        correo = jwtService.extraerUsername(token);
+                        claims = jwtService.validarTokenRecuperacion(token);
                 } catch (ExpiredJwtException e) {
                         throw new BusinessException("El enlace de recuperación ha expirado.", HttpStatus.BAD_REQUEST);
                 } catch (JwtException e) {
                         throw new BusinessException("El enlace de recuperación no es válido.", HttpStatus.BAD_REQUEST);
                 }
 
-                Usuario usuario = usuarioRepository.findByCorreo(correo)
-                                .orElseThrow(() -> new BusinessException("Usuario no encontrado.",
-                                                HttpStatus.NOT_FOUND));
+                Usuario usuario = usuarioRepository.findByCorreo(claims.getSubject())
+                                .orElseThrow(() -> new BusinessException("El enlace de recuperación no es válido.",
+                                                HttpStatus.BAD_REQUEST));
+
+                /* EL ENLACE SOLO SIRVE UNA VEZ: SE INVALIDA SI LA CONTRASEÑA CAMBIÓ DESPUÉS DE EMITIRLO */
+                if (usuario.getFechaCambioClave() != null && claims.getIssuedAt() != null) {
+                        LocalDateTime emitido = LocalDateTime.ofInstant(claims.getIssuedAt().toInstant(), ZoneId.systemDefault());
+
+                        if (emitido.isBefore(usuario.getFechaCambioClave().truncatedTo(ChronoUnit.SECONDS))) {
+                                throw new BusinessException("Este enlace de recuperación ya fue utilizado. Solicita uno nuevo.",
+                                                HttpStatus.BAD_REQUEST);
+                        }
+                }
 
                 usuario.setClave(passwordEncoder.encode(nuevaPassword));
+                usuario.setFechaCambioClave(LocalDateTime.now());
                 /* AL RESTABLECERLA DEJA DE SER TEMPORAL */
                 usuario.setDebeCambiarClave(false);
                 usuarioRepository.save(usuario);
@@ -199,6 +218,19 @@ public class UsuarioService {
                                 usuario.getId(), usuario.getNombre(), usuario.getApellido(),
                                 "clave", "********", "********", "RESTABLECIMIENTO_CLAVE", ip,
                                 usuario.getId(), usuario.getNombre(), usuario.getApellido());
+        }
+
+        /* REGISTRA EN BITÁCORA UN INICIO DE SESIÓN QUE NO SE PERMITIÓ */
+        public void registrarIntentoFallido(String correo, String ip, String tipoEvento) {
+                Usuario usuario = usuarioRepository.findByCorreo(correo).orElse(null);
+
+                bitacoraClient.registrarIntentoFallido(
+                                usuario == null ? null : usuario.getId(),
+                                correo,
+                                usuario == null ? null : usuario.getNombre(),
+                                usuario == null ? null : usuario.getApellido(),
+                                usuario == null || usuario.getRol() == null ? null : usuario.getRol().getNombre(),
+                                ip, tipoEvento);
         }
 
         /* LA FECHA DE NACIMIENTO NO PUEDE SER FUTURA Y DEBE SER MAYOR DE EDAD */

@@ -36,6 +36,18 @@ public class BitacoraClient {
         }
     }
 
+    /* INICIO DE SESIÓN NO PERMITIDO; SI EL CORREO NO EXISTE, SOLO SE GUARDA EL CORREO */
+    @Async
+    public void registrarIntentoFallido(Long idUsuario, String correo, String nombre, String apellido, String rol,
+            String ip, String tipoEvento) {
+        try {
+            SesionRequest request = new SesionRequest(idUsuario, ip, correo, nombre, apellido, rol, tipoEvento);
+            restTemplate.postForEntity(bitacoraUrl + "/bitacora/sesion/registrar", request, Void.class);
+        } catch (Exception e) {
+            log.error("No se pudo registrar el intento de inicio de sesión en bitácora: {}", e.getMessage());
+        }
+    }
+
     @Async
     public void registrarCambioUsuario(Long idUsuarioModificado, String nombreUsuarioModificado, String apellidoUsuarioModificado,
         String campoModificado, String valorAnterior, String valorNuevo, String tipoEvento, String ipUsuarioModificador,

@@ -7,6 +7,7 @@ import { RegistroRequestPortal } from '../../../../core/models/auth.models';
 import { LucideAngularModule } from 'lucide-angular';
 import { ICONOS } from '../../../../core/iconos';
 import { fechaMaximaNacimiento, fechaNoFuturaValidator, mayorDeEdadValidator } from '../../../../core/validators/fechas';
+import { LONGITUD_MINIMA_CLAVE, PATRON_CLAVE } from '../../../../core/validators/claves';
 
 
 function passwordsMatchValidator(
@@ -58,7 +59,12 @@ export class NuevoUsuario {
     nombre: ['', [Validators.required]],
     apellido: ['', [Validators.required]],
     correo: ['', [Validators.required, Validators.email]],
-    clave: ['', [Validators.required, Validators.minLength(8)]],
+    /* MISMAS REGLAS QUE EL RESTO DE CONTRASEÑAS */
+    clave: ['', [
+      Validators.required,
+      Validators.minLength(LONGITUD_MINIMA_CLAVE),
+      Validators.pattern(PATRON_CLAVE),
+    ]],
     confirmarClave: ['', [Validators.required]],
     fechaNacimiento: ['', [Validators.required, mayorDeEdadValidator, fechaNoFuturaValidator]],
     dpi: ['', [

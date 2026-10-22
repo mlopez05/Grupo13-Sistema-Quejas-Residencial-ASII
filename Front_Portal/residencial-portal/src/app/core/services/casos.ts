@@ -8,6 +8,7 @@ import {
   CategoriaResponse,
   RegistrarCasoRequest,
 } from '../models/caso.models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -15,7 +16,7 @@ import {
 export class CasosService {
   private readonly http = inject(HttpClient);
 
-  private readonly apiUrl = 'http://localhost:8081/api/casos';
+  private readonly apiUrl = `${environment.casosUrl}/api/casos`;
 
   obtenerCatalogo(): Observable<CategoriaResponse[]> {
     return this.http.get<CategoriaResponse[]>(`${this.apiUrl}/catalogo`);

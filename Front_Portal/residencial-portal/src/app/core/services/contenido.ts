@@ -9,6 +9,7 @@ import {
   ServicioRequest,
   ServicioResponse,
 } from '../models/contenido.models';
+import { environment } from '../../../environments/environment';
 
 /* CONTENIDO DEL PORTAL Y CATÁLOGO */
 @Injectable({
@@ -17,9 +18,9 @@ import {
 export class ContenidoService {
   private readonly http = inject(HttpClient);
 
-  private readonly publicoUrl = 'http://localhost:8082/api/portal/publico';
-  private readonly adminUrl = 'http://localhost:8082/api/portal/admin';
-  private readonly catalogoUrl = 'http://localhost:8081/api/casos/catalogo/admin';
+  private readonly publicoUrl = `${environment.contenidoUrl}/api/portal/publico`;
+  private readonly adminUrl = `${environment.contenidoUrl}/api/portal/admin`;
+  private readonly catalogoUrl = `${environment.casosUrl}/api/casos/catalogo/admin`;
 
   /* DATOS DEL RESIDENCIAL */
   readonly configuracion = signal<ConfiguracionPortal | null>(null);

@@ -11,7 +11,6 @@ import java.util.function.Supplier;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.http.HttpStatus;
@@ -99,8 +98,7 @@ public class AuditoriaService {
             case "sesiones" -> new Consulta<Sesion>("Sesiones", sesionRepository, "id_sesion",
                     List.of("nombre_usuario", "apellido_usuario", "correo_usuario"),
                     s -> new RegistroAuditoriaResponse(s.getId_sesion(), s.getFecha(), s.getHora(),
-                            persona(s.getNombre_usuario(), s.getApellido_usuario()) + correo(s.getCorreo_usuario()),
-                            s.getRol_usuario(), s.getTipo_evento(), "", s.getIp_usuario()),
+                            usuarioSesion(s), s.getRol_usuario(), s.getTipo_evento(), detalleSesion(s), s.getIp_usuario()),
                     sesionRepository::listarTiposEvento);
 
             case "usuarios" -> new Consulta<Usuario>("Cambios de usuarios", usuarioRepository, "id_bitacora_usuario",
@@ -134,7 +132,7 @@ public class AuditoriaService {
 
     private <T> PaginaResponse<RegistroAuditoriaResponse> consultar(Consulta<T> consulta, FiltroAuditoria filtro) {
         Page<T> pagina = consulta.repositorio().findAll(especificacion(consulta, filtro),
-                PageRequest.of(filtro.paginaEfectiva(), filtro.tamanoEfectivo(), orden(consulta)));
+                PageRequest.of(filtro.paginaEfectiva(), filtro.tamanoEfectivo()));
 
         return new PaginaResponse<>(
                 pagina.getContent().stream().map(consulta.aFila()).toList(),
@@ -146,7 +144,7 @@ public class AuditoriaService {
 
     private <T> List<RegistroAuditoriaResponse> todas(Consulta<T> consulta, FiltroAuditoria filtro) {
         return consulta.repositorio()
-                .findAll(especificacion(consulta, filtro), PageRequest.of(0, MAXIMO_FILAS_EXPORTACION, orden(consulta)))
+                .findAll(especificacion(consulta, filtro), PageRequest.of(0, MAXIMO_FILAS_EXPORTACION))
                 .getContent().stream()
                 .map(consulta.aFila())
                 .toList();
@@ -176,12 +174,13 @@ public class AuditoriaService {
                         .toArray(Predicate[]::new)));
             }
 
+            /* DEL MÁS RECIENTE AL MÁS ANTIGUO. SE ORDENA AQUÍ PORQUE SPRING DATA LEERÍA "id_sesion" COMO UNA RUTA (id.sesion) */
+            if (!Long.class.equals(query.getResultType()) && !long.class.equals(query.getResultType())) {
+                query.orderBy(cb.desc(root.get("fecha")), cb.desc(root.get("hora")), cb.desc(root.get(consulta.campoId())));
+            }
+
             return cb.and(condiciones.toArray(Predicate[]::new));
         };
-    }
-
-    private static Sort orden(Consulta<?> consulta) {
-        return Sort.by(Sort.Direction.DESC, "fecha", "hora", consulta.campoId());
     }
 
     /* TEXTOS DE CADA FILA */
@@ -234,6 +233,22 @@ public class AuditoriaService {
         lineas.add("Registros: " + total + (total >= MAXIMO_FILAS_EXPORTACION ? " (límite de exportación alcanzado)" : ""));
         lineas.add("Generado: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
         return lineas;
+    }
+
+    /* SI EL CORREO NO ESTÁ REGISTRADO SOLO SE MUESTRA EL CORREO */
+    private static String usuarioSesion(Sesion s) {
+        String nombre = (valor(s.getNombre_usuario()) + " " + valor(s.getApellido_usuario())).trim();
+        return nombre.isEmpty() ? valor(s.getCorreo_usuario()) : nombre + correo(s.getCorreo_usuario());
+    }
+
+    private static String detalleSesion(Sesion s) {
+        return switch (valor(s.getTipo_evento())) {
+            case "INICIO_SESION_FALLIDO" -> s.getId_usuario() == null
+                    ? "Intento fallido: el correo no está registrado"
+                    : "Intento fallido: contraseña incorrecta";
+            case "INICIO_SESION_BLOQUEADO" -> "Intento rechazado: el usuario está inactivo";
+            default -> "";
+        };
     }
 
     private static String persona(String nombre, String apellido) {

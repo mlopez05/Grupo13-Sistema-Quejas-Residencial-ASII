@@ -3,7 +3,9 @@ package com.portal.residencial.authservice.controller;
 import com.portal.residencial.authservice.bitacora.BitacoraClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -40,8 +42,16 @@ public class AuthController {
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request,
             HttpServletRequest httpRequest) {
 
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.usuario(), request.clave()));
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.usuario(), request.clave()));
+        } catch (DisabledException e) {
+            usuarioService.registrarIntentoFallido(request.usuario(), httpRequest.getRemoteAddr(), "INICIO_SESION_BLOQUEADO");
+            throw e;
+        } catch (AuthenticationException e) {
+            usuarioService.registrarIntentoFallido(request.usuario(), httpRequest.getRemoteAddr(), "INICIO_SESION_FALLIDO");
+            throw e;
+        }
 
         UserDetails userDetails = usuarioDetailsService.loadUserByUsername(request.usuario());
         String token = jwtService.generarToken(userDetails);

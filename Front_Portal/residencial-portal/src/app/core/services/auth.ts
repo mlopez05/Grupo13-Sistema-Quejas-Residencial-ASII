@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { Router } from '@angular/router';
 import { CambiarClaveRequest, LoginRequest, LoginResponse, RecuperacionRequest, RegistroRequest, RegistroRequestPortal, RegistroResponse, ResetPasswordRequest } from '../models/auth.models';
 import { finalize } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -12,7 +13,7 @@ import { finalize } from 'rxjs';
 export class AuthService {
   private readonly http = inject(HttpClient);
 
-  private readonly apiUrl = 'http://localhost:8080';
+  private readonly apiUrl = environment.authUrl;
 
   private readonly sessionService = inject(SessionService);
   private readonly router = inject(Router);

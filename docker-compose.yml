@@ -1,0 +1,177 @@
+# PORTAL DE QUEJAS RESIDENCIAL
+# UNA BASE DE DATOS POR MICROSERVICIO. SOLO EL FRONT (NGINX) SE PUBLICA AL EXTERIOR.
+# USO: copiar .env.example a .env, completar los valores y ejecutar: docker compose up -d --build
+
+name: portal-residencial
+
+x-db: &db
+  image: postgres:16-alpine
+  restart: unless-stopped
+  healthcheck:
+    test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+    interval: 5s
+    timeout: 5s
+    retries: 20
+
+x-servicio: &servicio
+  restart: unless-stopped
+  environment: &comun
+    JWT_SECRET: ${JWT_SECRET}
+    FRONTEND_URL: ${FRONTEND_URL}
+    DB_PORT: 5432
+
+services:
+
+  # ========== BASES DE DATOS ==========
+
+  db-auth:
+    <<: *db
+    environment:
+      POSTGRES_DB: db-auth
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: ${DB_AUTH_PASSWORD}
+    volumes:
+      - db-auth-data:/var/lib/postgresql/data
+
+  db-casos:
+    <<: *db
+    environment:
+      POSTGRES_DB: db_casos
+      POSTGRES_USER: casos_user
+      POSTGRES_PASSWORD: ${DB_CASOS_PASSWORD}
+    volumes:
+      - db-casos-data:/var/lib/postgresql/data
+
+  db-contenido:
+    <<: *db
+    environment:
+      POSTGRES_DB: db_admin
+      POSTGRES_USER: admin_user
+      POSTGRES_PASSWORD: ${DB_CONTENIDO_PASSWORD}
+    volumes:
+      - db-contenido-data:/var/lib/postgresql/data
+
+  db-notificaciones:
+    <<: *db
+    environment:
+      POSTGRES_DB: db_notificaciones
+      POSTGRES_USER: notificaciones_user
+      POSTGRES_PASSWORD: ${DB_NOTIFICACIONES_PASSWORD}
+    volumes:
+      - db-notificaciones-data:/var/lib/postgresql/data
+
+  db-bitacora:
+    <<: *db
+    environment:
+      POSTGRES_DB: db_bitacora
+      POSTGRES_USER: bitacora_user
+      POSTGRES_PASSWORD: ${DB_BITACORA_PASSWORD}
+    volumes:
+      - db-bitacora-data:/var/lib/postgresql/data
+
+  # ========== MICROSERVICIOS ==========
+
+  auth-service:
+    <<: *servicio
+    build: ./Backend_Portal/auth-service
+    environment:
+      <<: *comun
+      DB_HOST: db-auth
+      DB_NAME: db-auth
+      DB_USER: auth_user
+      DB_AUTH_PASSWORD: ${DB_AUTH_PASSWORD}
+      NOTIFICACIONES_URL: http://notification-service:8084
+      BITACORA_URL: http://bitacora-service:8085
+      CASOS_URL: http://casos-service:8081
+      FRONTEND_LOGIN_URL: ${FRONTEND_URL}/login
+      FRONTEND_RESET_URL: ${FRONTEND_URL}/restablecer-password
+      ADMIN_CORREO: ${ADMIN_CORREO}
+      ADMIN_CLAVE: ${ADMIN_CLAVE}
+    depends_on:
+      db-auth:
+        condition: service_healthy
+
+  casos-service:
+    <<: *servicio
+    build: ./Backend_Portal/casos-service
+    environment:
+      <<: *comun
+      DB_HOST: db-casos
+      DB_NAME: db_casos
+      DB_USER: casos_user
+      DB_CASOS_PASSWORD: ${DB_CASOS_PASSWORD}
+      AUTH_URL: http://auth-service:8080
+      NOTIFICACIONES_URL: http://notification-service:8084
+      BITACORA_URL: http://bitacora-service:8085
+      ARCHIVOS_DIR: /app/uploads
+    volumes:
+      - casos-uploads:/app/uploads
+    depends_on:
+      db-casos:
+        condition: service_healthy
+
+  contenido-service:
+    <<: *servicio
+    build: ./Backend_Portal/contenido-service
+    environment:
+      <<: *comun
+      DB_HOST: db-contenido
+      DB_NAME: db_admin
+      DB_USER: admin_user
+      DB_CONTENIDO_PASSWORD: ${DB_CONTENIDO_PASSWORD}
+    depends_on:
+      db-contenido:
+        condition: service_healthy
+
+  notification-service:
+    <<: *servicio
+    build: ./Backend_Portal/notification-service
+    environment:
+      <<: *comun
+      DB_HOST: db-notificaciones
+      DB_NAME: db_notificaciones
+      DB_USER: notificaciones_user
+      DB_NOTIFICACIONES_PASSWORD: ${DB_NOTIFICACIONES_PASSWORD}
+      CORREO_PROVEEDOR: ${CORREO_PROVEEDOR:-smtp}
+      CORREO_REMITENTE: ${CORREO_REMITENTE}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      BREVO_API_KEY: ${BREVO_API_KEY}
+    depends_on:
+      db-notificaciones:
+        condition: service_healthy
+
+  bitacora-service:
+    <<: *servicio
+    build: ./Backend_Portal/bitacora-service
+    environment:
+      <<: *comun
+      DB_HOST: db-bitacora
+      DB_NAME: db_bitacora
+      DB_USER: bitacora_user
+      DB_BITACORA_PASSWORD: ${DB_BITACORA_PASSWORD}
+    depends_on:
+      db-bitacora:
+        condition: service_healthy
+
+  # ========== FRONT (NGINX) ==========
+
+  frontend:
+    build: ./Front_Portal/residencial-portal
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-4200}:80"
+    depends_on:
+      - auth-service
+      - casos-service
+      - contenido-service
+      - notification-service
+      - bitacora-service
+
+volumes:
+  db-auth-data:
+  db-casos-data:
+  db-contenido-data:
+  db-notificaciones-data:
+  db-bitacora-data:
+  casos-uploads:

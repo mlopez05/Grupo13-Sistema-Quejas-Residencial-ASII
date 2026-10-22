@@ -1,4 +1,14 @@
 <!-- ENCABEZADO -->
+@if (interno) {
+<!-- DENTRO DEL ÁREA DEL RESIDENTE -->
+<section>
+  <p class="text-sm font-medium text-blue-600">Información</p>
+  <h2 class="mt-1 text-2xl font-bold tracking-tight text-slate-900">Avisos de la comunidad</h2>
+  <p class="mt-2 text-sm text-slate-500">
+    Comunicados, mantenimientos, actividades y novedades del residencial.
+  </p>
+</section>
+} @else {
 <section class="bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 text-white">
   <div class="mx-auto max-w-7xl px-6 py-16">
     <p class="text-sm font-semibold uppercase tracking-wider text-blue-300">Información</p>
@@ -8,10 +18,11 @@
     </p>
   </div>
 </section>
+}
 
 
-<section class="bg-white py-16">
-  <div class="mx-auto max-w-4xl px-6">
+<section [class]="interno ? 'mt-6' : 'bg-white py-16'">
+  <div [class]="interno ? 'max-w-4xl' : 'mx-auto max-w-4xl px-6'">
 
     @if (cargando) {
     <p class="text-sm text-slate-500">Cargando avisos...</p>

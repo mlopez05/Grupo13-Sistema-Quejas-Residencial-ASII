@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ActualizarPerfilRequest, ActualizarUsuarioRequest, UsuarioResponse } from '../models/usuario.models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -9,7 +10,7 @@ import { ActualizarPerfilRequest, ActualizarUsuarioRequest, UsuarioResponse } fr
 export class UsuarioService {
   private readonly http = inject(HttpClient);
 
-  private readonly apiUrl = 'http://localhost:8080/api/registro';
+  private readonly apiUrl = `${environment.authUrl}/api/registro`;
 
   listarUsuarios(): Observable<UsuarioResponse[]> {
     return this.http.get<UsuarioResponse[]>(`${this.apiUrl}/usuarios`);

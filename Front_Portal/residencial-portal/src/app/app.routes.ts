@@ -108,6 +108,13 @@ export const routes: Routes = [
             .then(m => m.NuevoCaso),
       },
       {
+        path: 'comunidad/avisos',
+        data: { interno: true },
+        loadComponent: () =>
+          import('./features/public/avisos/avisos')
+            .then(m => m.Avisos),
+      },
+      {
         path: 'casos/:id',
         data: { modo: 'residente' },
         loadComponent: () =>
